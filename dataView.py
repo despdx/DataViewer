@@ -132,19 +132,28 @@ class PageThree(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        fig = plt.figure(figsize=(5,5), dpi=100)
-        ax = fig.add_subplot(111)
-        ax.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5], 'bo-')
+        self.fig = plt.figure(figsize=(5,5), dpi=100)
+        self.ax = self.fig.add_subplot(111)
+        self.ax.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5], 'bo-')
 
-        
+        self.canvas = FigureCanvasTkAgg(self.fig, self)
+        self.canvas.show()
+        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-        canvas = FigureCanvasTkAgg(fig, self)
-        canvas.show()
-        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-
-        toolbar = NavigationToolbar2TkAgg(canvas, self)
+        toolbar = NavigationToolbar2TkAgg(self.canvas, self)
         toolbar.update()
-        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        dataWindow = tk.Scale(self, from_=100, to=1000, resolution=1,
+                orient="horizontal")
+        dataWindow.bind("<ButtonRelease-1>", self.graphDataWindowUpdate)
+        dataWindow.pack()
+
+    def graphDataWindowUpdate(self, event):
+        self.ax.clear()
+        self.ax.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5], 'go-')
+        self.canvas.show()
+
 
 def popupmsg(msg):
     popup = tk.Tk()
