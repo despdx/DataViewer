@@ -11,15 +11,22 @@ style.use('ggplot')
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 
 LARGE_FONT = ("Times", 12)
 
-figMain = plt.figure(figsize=(5,4), dpi=100)
-axMain1 = figMain.add_subplot(111)
+filename = "No File Loaded"
+import DataAnalyser
+data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
+#figMain = plt.figure(figsize=(5,4), dpi=100)
+#axMain1 = figMain.add_subplot(111)
 
 class dataViewApp(tk.Tk):
     ''' Data View Application Class
     '''
+
+    headerRow = 0
+    windowType = 'index'
 
     def __init__(self, *args, **kwargs):
         
@@ -39,6 +46,7 @@ class dataViewApp(tk.Tk):
         menubar = tk.Menu(container)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save settings", command=lambda: popupmsg('Not supported just yet!'))
+        filemenu.add_command(label="Load", command=loadData)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=quit)
         menubar.add_cascade(label="File", menu=filemenu)
@@ -46,16 +54,15 @@ class dataViewApp(tk.Tk):
         ''' Finish Menu bar '''
         tk.Tk.config(self,menu=menubar)
 
-
         ''' Make a dictionary of different frame types (classes) that
         we will use for the application.
         '''
         self.frames = {}
-        for FrameClass in (StartPage, PageOne, PageTwo, PageThree):
+        for newFrame in (StartPage, PageOne, PageTwo, PageThree):
 
-            frame = FrameClass(container, self)
+            frame = newFrame(container, self)
 
-            self.frames[FrameClass] = frame
+            self.frames[newFrame] = frame
 
             frame.grid(row=0, column=0, sticky="nsew")
 
@@ -68,6 +75,14 @@ class dataViewApp(tk.Tk):
 
         frame = self.frames[cont]
         frame.tkraise()
+
+def loadData() :
+    name = filedialog.askopenfilename()
+    print("Got filename:" +name)
+    filename = name
+    self.DA = DataAnalyser()
+    self.DA.load_csv(self.filename, header=self.headerRow)
+
 
 class StartPage(tk.Frame):
 
@@ -132,11 +147,12 @@ class PageThree(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        self.fig = plt.figure(figsize=(5,5), dpi=100)
+        self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
-        self.ax.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5], 'bo-')
+        self.ax.plot(data[0], data[1], 'bo-')
 
         self.canvas = FigureCanvasTkAgg(self.fig, self)
+        #self.canvas.mpl_connect('
         self.canvas.show()
         self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
@@ -151,7 +167,7 @@ class PageThree(tk.Frame):
 
     def graphDataWindowUpdate(self, event):
         self.ax.clear()
-        self.ax.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5], 'go-')
+        self.ax.plot(data[0],data[1], 'go-')
         self.canvas.show()
 
 
