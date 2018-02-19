@@ -3,7 +3,8 @@
 import matplotlib as mpl
 mpl.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-from matplotlib.figure import Figure
+#from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import style
 style.use('ggplot')
@@ -13,11 +14,11 @@ from tkinter import ttk
 
 LARGE_FONT = ("Times", 12)
 
-figMain = Figure(figsize=(5,4), dpi=100)
-axMain1 = fig.add_subplot(111)
+figMain = plt.figure(figsize=(5,4), dpi=100)
+axMain1 = figMain.add_subplot(111)
 
-class dataViewWindow(tk.Tk):
-    ''' Main window
+class dataViewApp(tk.Tk):
+    ''' Data View Application Class
     '''
 
     def __init__(self, *args, **kwargs):
@@ -33,6 +34,18 @@ class dataViewWindow(tk.Tk):
         container.pack(side="top", fill="both", expand = True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
+
+        ''' build a menu bar '''
+        menubar = tk.Menu(container)
+        filemenu = tk.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Save settings", command=lambda: popupmsg('Not supported just yet!'))
+        filemenu.add_separator()
+        filemenu.add_command(label="Exit", command=quit)
+        menubar.add_cascade(label="File", menu=filemenu)
+
+        ''' Finish Menu bar '''
+        tk.Tk.config(self,menu=menubar)
+
 
         ''' Make a dictionary of different frame types (classes) that
         we will use for the application.
@@ -119,13 +132,13 @@ class PageThree(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        f = Figure(figsize=(5,5), dpi=100)
-        a = f.add_subplot(111)
-        a.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5], 'bo-')
+        fig = plt.figure(figsize=(5,5), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5], 'bo-')
 
         
 
-        canvas = FigureCanvasTkAgg(f, self)
+        canvas = FigureCanvasTkAgg(fig, self)
         canvas.show()
         canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
@@ -133,7 +146,19 @@ class PageThree(tk.Frame):
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        
+def popupmsg(msg):
+    popup = tk.Tk()
+    popup.wm_title("!")
+    label = ttk.Label(popup, text=msg, font=NORM_FONT)
+    label.pack(side="top", fill="x", pady=10)
+    B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
+    B1.pack()
+    popup.mainloop()
 
-app = dataViewWindow()
+def quitHandler():
+    print("Quitting...")
+    quit()
+
+app = dataViewApp()
+app.protocol("WM_DELETE_WINDOW", quitHandler)
 app.mainloop()
