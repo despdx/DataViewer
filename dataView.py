@@ -18,6 +18,7 @@ LARGE_FONT = ("Times", 12)
 filename = "No File Loaded"
 from DataAnalyser.DataAnalyser import DataAnalyser
 DA = DataAnalyser()
+DA.load_csv('data.csv', index_col=0)
 #print("DA has data member: " + str(DA.data) )
 #data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
 #labels = ['x','y']
@@ -41,7 +42,7 @@ class DataViewApp(tk.Tk):
         
         ''' Arrange "this" frame '''
         self.minsize(640,480)
-        self.geometry("640x480")
+        #self.geometry("640x480")
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand = True)
         container.grid_rowconfigure(0, weight=1)
@@ -83,7 +84,7 @@ class DataViewApp(tk.Tk):
 
         frame = self.frames[cont]
         frame.tkraise()
-        frame.updateEvent(None)
+        #frame.updateEvent(None)
 
     def loadData(self, event) :
         loadData()
@@ -120,10 +121,15 @@ class PageThree(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
         self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
-        self.ax.plot(data[0], data[1], 'bo-')
+        df = DA.getViewData()
+        defViewX = DA.currentView[0]
+        defViewY = DA.currentView[1]
+        x = df[defViewX]
+        x = df[defViewY]
+        self.ax.plot(x, y, 'bo-')
+        self.fig.canvas.show()
 
         self.canvas = FigureCanvasTkAgg(self.fig, self)
         #self.canvas.mpl_connect('
@@ -134,16 +140,59 @@ class PageThree(tk.Frame):
         toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        dataWindow = tk.Scale(self, from_=100, to=1000, resolution=1,
+        ''' Data Window Size Widget '''
+        self.dataWindowSizeWidget = tk.Scale(self, from_=1, to=10, resolution=1,
                 orient="horizontal")
-        dataWindow.bind("<ButtonRelease-1>", self.updateEvent)
-        dataWindow.pack()
+        self.dataWindowSizeWidget.bind("<ButtonRelease-1>", self.updateEvent)
+        self.dataWindowSizeWidget.pack()
+        ''' Data Window Start Widget '''
+        self.dataWindowStartWidget = tk.Scale(self, from_=0, to=10, resolution=1,
+                orient="horizontal")
+        self.dataWindowStartWidget.bind("<ButtonRelease-1>", self.updateEvent)
+        self.dataWindowStartWidget.pack()
+        ''' Data View Index  '''
+        ''' Data View X Widget '''
+        self.dataViewXwidget = tk.ListBox(self)
+        self.dataViewXwidget.pack()
+        ''' Data View Y Widget '''
+        self.dataViewYwidget = tk.ListBox(self)
+        self.dataViewYwidget.pack()
+        self.updateLabels()
+        ''' Finished configuring frame, update values '''
+        self.updateEvent(None)
 
-    def paintCanvasWithFigure(self, canvas, fig):
-        self.canvas
+    def updateLabels(self) :
+        newLabels = self.DA.getLabels()
+        ''' clear old list '''
+        self.dataViewXwidget.delete(0, END)
+        ''' Relabel '''
+        self.dataViewXwidget.insert(END, "Choose a data for X" )
+        ''' get new lables and load them '''
+        self.updateListWidget(self.dataViewYwidget, newLabels )
+        ''' ditto for Y '''
+        self.dataViewYwidget.delete(0, END)
+        self.dataViewYwidget.insert(END, "Choose a data for Y" )
+        self.updateListWidget(self.dataViewXwidget, newLabels )
+
+    def updateListWidget(self, listWidget, listValues ) :
+        for item in listValues :
+            listWidget.insert(END,item)
 
     def updateEvent(self, event):
         global DA
+        newWinSize = self.dataWindowSizeWidget.get()
+        newWinStart = self.dataWindowStartWidget.get()
+        lastIndex = DA.getLastIndex()
+        lastStart = lastIndex - newWinSize
+
+        ''' set view '''
+        ySel = self.dataViewYwidget.curselection()
+        xSel = self.dataViewXwidget.curselection()
+        newView = [self.dataViewYwidget.get(), self.dataViewXwidget.get() ]
+
+        DA.setView( view=None, windowStart=newWinStart, windowSize=newWinSize,
+                windowType='index' )
+
         df = DA.getViewData()
         self.ax.clear()
         self.ax.plot(df[0].values, df[1].values, 'bo-')

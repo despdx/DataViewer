@@ -23,19 +23,27 @@ class DataAnalyser(object):
             self.df = pd.DataFrame(initObj)
         else :
             ''' Otherwise, just create a bogus one'''
-            self.df = pd.DataFrame( [[1,2],[2,4],[3,6]] )
-        self.currentView = [0,1]
+            x = np.arange(100)
+            y = np.random.rand(100)
+            self.df = pd.DataFrame( {'x':x, 'y':y} )
+            self.df.columns=['x','y']
+            self.currentView = ['x','y']
+
         self.windowStart = 0
-        self.windowSize = 100
+        self.windowSize = self.df.shape[0]
         self.windowType = 'index'
-        self.altIndexCol = 0
+        self.altIndexCol = 'index'
 
     def load_csv(self, *args, **kwargs):
-        data = pd.DataFrame.from_csv(args, kwargs)
+        data = pd.DataFrame.from_csv(*args, **kwargs)
         data = data.dropna()
-        self.currentView = [0]
-        if len(data.columns) > 2 :
-            self.currentView = [0,1]
+        columns = data.columns.tolist()
+        ''' Create a default view of the fist column only.  One column is
+        techincally okay, but, rest of implimentation may assume otherwise.
+        '''
+        self.currentView = columns[0:1]
+        if len(columns) >= 2 :
+            self.currentView = columns[0:2]
         self.df = data
 
 ##    def load(self, filetype='csv', filename=None, *args, **kwargs)##:
@@ -62,19 +70,28 @@ class DataAnalyser(object):
             raise Exception('Invalid Column Name')
         self.altIndexCol = value
 
-    def setView(self, view=[0,1], windowStart = 0, windowSize=100, windowType='index') :
-        self.currentView = view
-        self.windowStart = windowStart
-        self.windowSize = windowSize
-        self.windowType = windowType
+    def setView(self, view=None, windowStart = None, windowSize=None, windowType=None) :
+        if view is not None :
+            self.currentView = view
+        if windowStart is not None :
+            self.windowStart = windowStart
+        if windowSize is not None :
+            self.windowSize = windowSize
+        if windowType is not None :
+            if not windowType == 'index' :
+                print("WARNING: cannot set index type: " +str(windowType))
+                print("The only supported index type is: index.")
+            #self.windowType = windowType
     
     def getViewData(self) :
         if self.windowType == 'index' :
             start = self.windowStart
             end = self.windowStart + self.windowSize
             mySlice = slice(start,end)
-            df = self.df[ [self.currentView[0], self.currentView[1]] ]
-            return df[mySlice]
+            df = self.df[mySlice]
+            print("DEBUG: currentView:"+ str(self.currentView))
+            df = df[ self.currentView ]
+            return df
         else:
             raise Exception('DataAnalyser window type ' + self.windowType + ' not implemented')
 
@@ -95,3 +112,6 @@ class DataAnalyser(object):
             if len(self.currentView) > 1 :
                 axThree = data[labelThree].plot(x=self.altIndexCol, y=labelThree)
         return (axMain, axTwo, axThree)
+
+    def getLastIndex(self) :
+        return self.df.shape[1]
