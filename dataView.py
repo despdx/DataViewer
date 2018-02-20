@@ -16,14 +16,15 @@ from tkinter import filedialog
 LARGE_FONT = ("Times", 12)
 
 filename = "No File Loaded"
-import DataAnalyser
-DA = DataAnalyser
-data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
-labels = ['x','y']
-figMain = plt.figure(figsize=(5,4), dpi=100)
-axMain1 = figMain.add_subplot(111)
+from DataAnalyser.DataAnalyser import DataAnalyser
+DA = DataAnalyser()
+#print("DA has data member: " + str(DA.data) )
+#data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
+#labels = ['x','y']
+#figMain = plt.figure(figsize=(5,4), dpi=100)
+#axMain1 = figMain.add_subplot(111)
 
-class dataViewApp(tk.Tk):
+class DataViewApp(tk.Tk):
     ''' Data View Application Class
     '''
 
@@ -70,6 +71,9 @@ class dataViewApp(tk.Tk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
+        ''' Intialize Data Viewer '''
+        self.DA = DA
+
         ''' Show the starting frame type on init '''
         self.show_frame(PageThree)
 
@@ -79,7 +83,7 @@ class dataViewApp(tk.Tk):
 
         frame = self.frames[cont]
         frame.tkraise()
-        frame.updateEvent()
+        frame.updateEvent(None)
 
     def loadData(self, event) :
         loadData()
@@ -116,6 +120,7 @@ class PageThree(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
+        data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
         self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         self.ax.plot(data[0], data[1], 'bo-')
@@ -168,6 +173,6 @@ def quitHandler():
     print("Quitting...")
     quit()
 
-app = dataViewApp()
+app = DataViewApp()
 app.protocol("WM_DELETE_WINDOW", quitHandler)
 app.mainloop()
