@@ -17,9 +17,11 @@ LARGE_FONT = ("Times", 12)
 
 filename = "No File Loaded"
 import DataAnalyser
+DA = DataAnalyser
 data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
-#figMain = plt.figure(figsize=(5,4), dpi=100)
-#axMain1 = figMain.add_subplot(111)
+labels = ['x','y']
+figMain = plt.figure(figsize=(5,4), dpi=100)
+axMain1 = figMain.add_subplot(111)
 
 class dataViewApp(tk.Tk):
     ''' Data View Application Class
@@ -37,6 +39,8 @@ class dataViewApp(tk.Tk):
         tk.Tk.wm_title(self, "Data Viewer")
         
         ''' Arrange "this" frame '''
+        self.minsize(640,480)
+        self.geometry("640x480")
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand = True)
         container.grid_rowconfigure(0, weight=1)
@@ -58,7 +62,7 @@ class dataViewApp(tk.Tk):
         we will use for the application.
         '''
         self.frames = {}
-        for newFrame in (StartPage, PageOne, PageTwo, PageThree):
+        for newFrame in (StartPage, PageThree):
 
             frame = newFrame(container, self)
 
@@ -67,7 +71,7 @@ class dataViewApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         ''' Show the starting frame type on init '''
-        self.show_frame(StartPage)
+        self.show_frame(PageThree)
 
     def show_frame(self, cont):
         ''' method for switching content
@@ -75,14 +79,11 @@ class dataViewApp(tk.Tk):
 
         frame = self.frames[cont]
         frame.tkraise()
+        frame.updateEvent()
 
-def loadData() :
-    name = filedialog.askopenfilename()
-    print("Got filename:" +name)
-    filename = name
-    self.DA = DataAnalyser()
-    self.DA.load_csv(self.filename, header=self.headerRow)
-
+    def loadData(self, event) :
+        loadData()
+        self.show_frame(PageThree)
 
 class StartPage(tk.Frame):
 
@@ -102,38 +103,6 @@ class StartPage(tk.Frame):
         button3 = ttk.Button(self, text="Graph Page",
                             command=lambda: controller.show_frame(PageThree))
         button3.pack()
-
-
-class PageOne(tk.Frame):
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
-
-        button1 = ttk.Button(self, text="Back to Home",
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
-
-        button2 = ttk.Button(self, text="Page Two",
-                            command=lambda: controller.show_frame(PageTwo))
-        button2.pack()
-
-
-class PageTwo(tk.Frame):
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
-
-        button1 = ttk.Button(self, text="Back to Home",
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
-
-        button2 = ttk.Button(self, text="Page One",
-                            command=lambda: controller.show_frame(PageOne))
-        button2.pack()
 
 
 class PageThree(tk.Frame):
@@ -162,13 +131,28 @@ class PageThree(tk.Frame):
 
         dataWindow = tk.Scale(self, from_=100, to=1000, resolution=1,
                 orient="horizontal")
-        dataWindow.bind("<ButtonRelease-1>", self.graphDataWindowUpdate)
+        dataWindow.bind("<ButtonRelease-1>", self.updateEvent)
         dataWindow.pack()
 
-    def graphDataWindowUpdate(self, event):
+    def paintCanvasWithFigure(self, canvas, fig):
+        self.canvas
+
+    def updateEvent(self, event):
+        global DA
+        df = DA.getViewData()
         self.ax.clear()
-        self.ax.plot(data[0],data[1], 'go-')
-        self.canvas.show()
+        self.ax.plot(df[0].values, df[1].values, 'bo-')
+        self.fig.canvas.show()
+
+def loadData(event):
+    global DA
+    global labels
+
+    name = filedialog.askopenfilename()
+    print("Got filename:" +name)
+    DA.load_csv(filename, header=self.headerRow)
+    labels = DA.getLabels()
+    return labels
 
 
 def popupmsg(msg):
