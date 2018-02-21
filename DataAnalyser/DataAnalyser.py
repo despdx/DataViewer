@@ -21,33 +21,40 @@ class DataAnalyser(object):
         if initObj :
             ''' Try to initialize the data object with the first passed argument '''
             self.df = pd.DataFrame(initObj)
+            self.__setDefaultConfig()
+            self.isLoaded = True
         else :
-            ''' Otherwise, just create a bogus one'''
-            x = np.arange(100)
-            y = np.random.rand(100)
-            self.df = pd.DataFrame( {'x':x, 'y':y} )
-            self.df.columns=['x','y']
-            self.currentView = ['x','y']
+            ''' Otherwise, empty'''
+            self.isLoaded = False
 
+    def __setDefaultConfig(self):
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: __setDefaultConfig: no data loaded")
         self.windowStart = 0
         self.windowSize = self.df.shape[0]
         self.windowType = 'index'
         self.altIndexCol = 'index'
+        ''' Create a default view of the fist column only.  One column is
+        techincally okay, but, rest of implimentation may assume otherwise.
+        '''
+        self.currentView = columns[0:1].tolist()
+        if columns.size > 1 :
+            self.currentView = columns[0:2].tolist()
+
+    def loadRandomData(self) :
+        x = np.arange(100)
+        y = np.random.rand(100)
+        self.df = pd.DataFrame( {'x':x, 'y':y} )
+        self.__setDefaultConfig()
+        self.isLoaded = True
+        
 
     def load_csv(self, *args, **kwargs):
         data = pd.DataFrame.from_csv(*args, **kwargs)
         data = data.dropna()
         columns = data.columns.tolist()
         self.df = data
-
-        #TODO : split generic default code into separate method
-        ''' Create a default view of the fist column only.  One column is
-        techincally okay, but, rest of implimentation may assume otherwise.
-        '''
-        self.currentView = columns[0:1]
-        if len(columns) >= 2 :
-            self.currentView = columns[0:2]
-
+        self.isLoaded = True
 
 ##    def load(self, filetype='csv', filename=None, *args, **kwargs)##:
 ##        self.df = None
@@ -63,17 +70,25 @@ class DataAnalyser(object):
 ##        self.df = loadFunc(path=filename, args, kwargs)
 
     def getColumnList(self) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: getColumnList: no data loaded")
         return self.getLabels()
 
     def getLabels(self):
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: getLabels: no data loaded")
         return self.df.columns
 
     def setAltIndexColumn(self, value):
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: setAltIndexColumn: no data loaded")
         if value not in self.df.columns :
             raise Exception('Invalid Column Name')
         self.altIndexCol = value
 
     def setView(self, view=None, windowStart = None, windowSize=None, windowType=None) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         if view is not None :
             for item in view :
                 if item not in self.getLabels():
@@ -90,6 +105,8 @@ class DataAnalyser(object):
             #self.windowType = windowType
     
     def getViewData(self) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: getViewData: no data loaded")
         if self.windowType == 'index' :
             start = self.windowStart
             end = self.windowStart + self.windowSize
@@ -102,12 +119,16 @@ class DataAnalyser(object):
             raise Exception('DataAnalyser window type ' + self.windowType + ' not implemented')
 
     def get2DData(self) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: get2DData: no data loaded")
         return (self.df[self.altIndexCol].values,
                 self.df[self.currentView[0].values],
                 self.df[self.currentView[1].values]
                 )
 
     def getAxes(self) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         xColName = self.currentView[0]
         yColName = self.currentView[1]
         axMain = data.plot(x=xColName,y=yColName)
@@ -120,4 +141,10 @@ class DataAnalyser(object):
         return (axMain, axTwo, axThree)
 
     def getLastIndex(self) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         return self.df.shape[1]
+
+class DataNotLoaded(Exception) :
+    def __init__(self,*args,**kwargs) :
+        Exception.__init__(self,*args,**kwargs)

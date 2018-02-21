@@ -149,24 +149,30 @@ class PageThree(tk.Frame):
         ''' Data View Index  '''
         ''' Data View X Widget '''
         self.xViewSel = tk.StringVar(self)
-        self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, 'No data')
+        self.xViewSel.set("No data") # default value
+        self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, "Select a data type for the hoizontal axis.")
+        self.dataViewXwidget.configure(state="disabled")
         self.dataViewXwidget.pack()
         ''' Data View Y Widget '''
         self.yViewSel = tk.StringVar(self)
-        self.dataViewYwidget = tk.OptionMenu(self, self.xViewSel, 'No data')
+        self.yViewSel.set("No data") # default value
+        self.dataViewYwidget = tk.OptionMenu(self, self.xViewSel, "Select a data type for the veritical axis.")
         self.dataViewYwidget.pack()
+        self.dataViewYwidget.configure(state="disabled")
 
     def updateLabels(self) :
+        if not self.isLoaded :
+            return DataNotLoaded()
         newLabels = DA.getLabels()
-        ''' clear old list '''
-        ''' Relabel '''
-        self.dataViewXwidget.insert(END, "Choose a data type for horizontal axis" )
-        ''' get new lables and load them '''
-        self.updateListWidget(self.dataViewYwidget, newLabels )
-        ''' ditto for Y '''
-        self.dataViewYwidget.delete(0, END)
-        self.dataViewYwidget.insert(END, "Choose a data type for vertical axis" )
-        self.updateListWidget(self.dataViewYwidget, newLabels )
+        self.xViewSel = '' # clear x view selection
+        self.yViewSel = '' # clear y view selection
+        ''' Relabel the drop down menus'''
+        for label in  newLabels :
+            for widget in [ self.dataViewXwidget , self.dataViewYwidget ] :
+                ''' Adds each lable to the menu, and creates an action to set the
+                selection variable to the appropriate value when selected '''
+                widget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) )
+                widget.configure(state="normal") # enable widget
 
     def updateListWidget(self, listWidget, listValues ) :
         END = tk.END
@@ -174,7 +180,9 @@ class PageThree(tk.Frame):
             listWidget.insert(END,item)
 
     def updateEvent(self, event):
-        global DA
+        if not self.isLoaded :
+            return DataNotLoaded()
+        DA = self.DA
         newWinSize = self.dataWindowSizeWidget.get()
         newWinStart = self.dataWindowStartWidget.get()
         lastIndex = DA.getLastIndex()
@@ -193,6 +201,10 @@ class PageThree(tk.Frame):
         self.ax.clear()
         self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
         self.fig.canvas.show()
+
+class DataNotLoaded(Exception) :
+    def __init__(self,*args,**kwargs) :
+        Exception.__init__(self,*args,**kwargs)
 
 def loadData(event):
     global DA
