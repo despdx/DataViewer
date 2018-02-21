@@ -52,7 +52,7 @@ class DataViewApp(tk.Tk):
         menubar = tk.Menu(container)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save settings", command=lambda: popupmsg('Not supported just yet!'))
-        filemenu.add_command(label="Load", command=loadData)
+        filemenu.add_command(label="Load", command=self.loadData)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=quit)
         menubar.add_cascade(label="File", menu=filemenu)
@@ -73,7 +73,7 @@ class DataViewApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         ''' Intialize Data Viewer '''
-        self.DA = DA
+        self.DA = 'no data'
 
         ''' Show the starting frame type on init '''
         self.show_frame(PageThree)
@@ -97,14 +97,6 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Start Page", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
 
-        button = ttk.Button(self, text="Visit Page 1",
-                            command=lambda: controller.show_frame(PageOne))
-        button.pack()
-
-        button2 = ttk.Button(self, text="Visit Page 2",
-                            command=lambda: controller.show_frame(PageTwo))
-        button2.pack()
-
         button3 = ttk.Button(self, text="Graph Page",
                             command=lambda: controller.show_frame(PageThree))
         button3.pack()
@@ -125,13 +117,14 @@ class PageThree(tk.Frame):
 
         self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
-        df = DA.getViewData()
-        defViewX = DA.currentView[0]
-        defViewY = DA.currentView[1]
-        print("DEBUG: defalt view: "+str([defViewX,defViewY]))
-        x = df[defViewX]
-        y = df[defViewY]
-        self.ax.plot(x, y, 'bo-')
+        #df = DA.getViewData()
+        #defViewX = DA.currentView[0]
+        #defViewY = DA.currentView[1]
+        #print("DEBUG: defalt view: "+str([defViewX,defViewY]))
+        #x = df[defViewX]
+        #y = df[defViewY]
+        #self.ax.plot(x, y, 'bo-')
+        self.ax.set_title('No data')
         self.fig.canvas.show()
 
         self.canvas = FigureCanvasTkAgg(self.fig, self)
@@ -155,24 +148,17 @@ class PageThree(tk.Frame):
         self.dataWindowStartWidget.pack()
         ''' Data View Index  '''
         ''' Data View X Widget '''
-        self.dataViewXwidget = tk.Listbox(self, exportselection=0)
+        self.xViewSel = tk.StringVar(self)
+        self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, 'No data')
         self.dataViewXwidget.pack()
-        self.dataViewXwidget.insert(0,defViewX)
-        self.dataViewXwidget.selection_set(0)
         ''' Data View Y Widget '''
-        self.dataViewYwidget = tk.Listbox(self, exportselection=0)
+        self.yViewSel = tk.StringVar(self)
+        self.dataViewYwidget = tk.OptionMenu(self, self.xViewSel, 'No data')
         self.dataViewYwidget.pack()
-        self.dataViewYwidget.insert(0,defViewY)
-        self.dataViewYwidget.selection_set(0)
-        self.updateLabels()
-        ''' Finished configuring frame, update values '''
-        #self.updateEvent(None)
 
     def updateLabels(self) :
         newLabels = DA.getLabels()
         ''' clear old list '''
-        END = tk.END
-        self.dataViewXwidget.delete(0, END)
         ''' Relabel '''
         self.dataViewXwidget.insert(END, "Choose a data type for horizontal axis" )
         ''' get new lables and load them '''
