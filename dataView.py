@@ -112,6 +112,8 @@ class StartPage(tk.Frame):
 
 class PageThree(tk.Frame):
 
+    #TODO : organize default values
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
@@ -126,8 +128,9 @@ class PageThree(tk.Frame):
         df = DA.getViewData()
         defViewX = DA.currentView[0]
         defViewY = DA.currentView[1]
+        print("DEBUG: defalt view: "+str([defViewX,defViewY]))
         x = df[defViewX]
-        x = df[defViewY]
+        y = df[defViewY]
         self.ax.plot(x, y, 'bo-')
         self.fig.canvas.show()
 
@@ -152,29 +155,35 @@ class PageThree(tk.Frame):
         self.dataWindowStartWidget.pack()
         ''' Data View Index  '''
         ''' Data View X Widget '''
-        self.dataViewXwidget = tk.ListBox(self)
+        self.dataViewXwidget = tk.Listbox(self, exportselection=0)
         self.dataViewXwidget.pack()
+        self.dataViewXwidget.insert(0,defViewX)
+        self.dataViewXwidget.selection_set(0)
         ''' Data View Y Widget '''
-        self.dataViewYwidget = tk.ListBox(self)
+        self.dataViewYwidget = tk.Listbox(self, exportselection=0)
         self.dataViewYwidget.pack()
+        self.dataViewYwidget.insert(0,defViewY)
+        self.dataViewYwidget.selection_set(0)
         self.updateLabels()
         ''' Finished configuring frame, update values '''
-        self.updateEvent(None)
+        #self.updateEvent(None)
 
     def updateLabels(self) :
-        newLabels = self.DA.getLabels()
+        newLabels = DA.getLabels()
         ''' clear old list '''
+        END = tk.END
         self.dataViewXwidget.delete(0, END)
         ''' Relabel '''
-        self.dataViewXwidget.insert(END, "Choose a data for X" )
+        self.dataViewXwidget.insert(END, "Choose a data type for horizontal axis" )
         ''' get new lables and load them '''
         self.updateListWidget(self.dataViewYwidget, newLabels )
         ''' ditto for Y '''
         self.dataViewYwidget.delete(0, END)
-        self.dataViewYwidget.insert(END, "Choose a data for Y" )
-        self.updateListWidget(self.dataViewXwidget, newLabels )
+        self.dataViewYwidget.insert(END, "Choose a data type for vertical axis" )
+        self.updateListWidget(self.dataViewYwidget, newLabels )
 
     def updateListWidget(self, listWidget, listValues ) :
+        END = tk.END
         for item in listValues :
             listWidget.insert(END,item)
 
@@ -188,14 +197,15 @@ class PageThree(tk.Frame):
         ''' set view '''
         ySel = self.dataViewYwidget.curselection()
         xSel = self.dataViewXwidget.curselection()
-        newView = [self.dataViewYwidget.get(), self.dataViewXwidget.get() ]
+        newView = [ xSel,ySel ]
+        print("DEBUG: newView: "+str(newView))
 
         DA.setView( view=None, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
 
         df = DA.getViewData()
         self.ax.clear()
-        self.ax.plot(df[0].values, df[1].values, 'bo-')
+        self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
         self.fig.canvas.show()
 
 def loadData(event):

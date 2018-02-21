@@ -38,13 +38,16 @@ class DataAnalyser(object):
         data = pd.DataFrame.from_csv(*args, **kwargs)
         data = data.dropna()
         columns = data.columns.tolist()
+        self.df = data
+
+        #TODO : split generic default code into separate method
         ''' Create a default view of the fist column only.  One column is
         techincally okay, but, rest of implimentation may assume otherwise.
         '''
         self.currentView = columns[0:1]
         if len(columns) >= 2 :
             self.currentView = columns[0:2]
-        self.df = data
+
 
 ##    def load(self, filetype='csv', filename=None, *args, **kwargs)##:
 ##        self.df = None
@@ -72,6 +75,9 @@ class DataAnalyser(object):
 
     def setView(self, view=None, windowStart = None, windowSize=None, windowType=None) :
         if view is not None :
+            for item in view :
+                if item not in self.getLabels():
+                    raise TypeError("ERROR: '"+item+"' not a valid label")
             self.currentView = view
         if windowStart is not None :
             self.windowStart = windowStart
