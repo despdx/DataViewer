@@ -106,8 +106,38 @@ class DataAnalyser(object):
                 print("The only supported index type is: index.")
             #self.windowType = windowType
 
+    def getIndexLimits(self) :
+        #TODO use alternative index
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+        return {    'max' : self.df.index.max(),
+                    'min' : self.df.index.min() }
+
     def getView(self) :
         return self.currentView
+
+    def getViewLimits(self) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: getWindowLimits: no data loaded")
+        x,y = self.view
+        return {    'xmin' : self.df[x].min(),
+                    'ymin' : self.df[y].min(),
+                    'xmax' : self.df[x].max(),
+                    'ymax' : self.df[y].max() }
+
+    def setWindow(self, start, size) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: setWindow: no data loaded")
+        self.windowStart = start
+        self.windowSize = size
+
+    def getWindow(self) :
+        return (self.windowStart, self.windowSize)
+
+    def getWindow(self) :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: getView: no data loaded")
+        return ( self.windowStart , self.windowSize )
     
     def getViewData(self) :
         if not self.isLoaded :
@@ -117,7 +147,7 @@ class DataAnalyser(object):
             end = self.windowStart + self.windowSize
             mySlice = slice(start,end)
             df = self.df[mySlice]
-            print("DEBUG: currentView:"+ str(self.currentView))
+            #print("DEBUG: currentView:"+ str(self.currentView))
             df = df[ self.currentView ]
             return df
         else:
@@ -144,11 +174,6 @@ class DataAnalyser(object):
             if len(self.currentView) > 1 :
                 axThree = data[labelThree].plot(x=self.altIndexCol, y=labelThree)
         return (axMain, axTwo, axThree)
-
-    def getLastIndex(self) :
-        if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
-        return self.df.shape[1]
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :

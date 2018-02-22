@@ -164,17 +164,37 @@ class PageThree(tk.Frame):
         self.dataViewYwidget.configure(state="disabled")
 
     def postLoad(self) :
+        ''' Things to run after loading a new DataAnalyser object.
+        '''
         self.updateLabels() # get new data types from data loaded
         view = self.DA.getView() # retrieve the default view after load
         self.setView(view) # configure GUI to reflect new data
+        ''' now, set the window '''
+        #TODO use data values instead of index values
+        limitDict=self.DA.getIndexLimits()
+        maxSize, minVal = ( limitDict['max'] , limitDict['min'] )
+        self.setWindow( minVal=minVal, start=0,
+                        maxSize=maxSize, size=maxSize/2) # reset the GUI window
+
+    def setWindow(self, minVal=0, start=0, maxSize=10, size=10) :
+        ''' set the GUI values that correspond to the window '''
+        self.dataWindowSizeWidget.config(from_=1, to=maxSize)
+        self.dataWindowSizeWidget.set(size)
+        self.dataWindowStartWidget.config(from_=minVal, to=size-start)
+        self.dataWindowStartWidget.set(start)
 
     def loadFileData(self) :
+        ''' Show a dialog to select a file and load it.
+        '''
         name = filedialog.askopenfilename()
         print("Got filename:" +name)
         loadData(name)
         self.postLoad()
 
     def updateLabels(self) :
+        ''' Update labels from the DataAnalyser object
+        Call whenever DA is loaded/changed.
+        '''
         if not self.DA.isLoaded :
             return DataNotLoaded()
         newLabels = DA.getLabels()
@@ -196,26 +216,33 @@ class PageThree(tk.Frame):
             listWidget.insert(END,item)
 
     def setView(self, view) :
-        ''' Set the GUI representation of the current data view '''
+        ''' Set the GUI representation of the current data view
+        Takes a "view" object and sets the GUI so that it matches.
+        '''
+        print("DEBUG: DataViewApp: setView: "+str(view))
         self.xViewSel.set(view[0])
-        #self.dataViewXwidget.pack()
         self.yViewSel.set(view[1])
-        #self.dataViewYwidget.pack()
+        # TODO Set active value in pulldown
 
     def updateEvent(self, event):
+        ''' Change/Update data view when user requests a change.
+        Call this whenever the user makes a change to view values.
+        '''
         if not self.DA.isLoaded :
             return DataNotLoaded()
         DA = self.DA
         newWinSize = self.dataWindowSizeWidget.get()
         newWinStart = self.dataWindowStartWidget.get()
-        lastIndex = DA.getLastIndex()
-        lastStart = lastIndex - newWinSize
+        limitDict=self.DA.getIndexLimits()
+        maxSize, minVal = ( limitDict['max'] , limitDict['min'] )
+        self.setWindow( minVal=minVal, start=newWinStart,
+                        maxSize=maxSize, size=newWinSize )
 
         ''' set view '''
         xSel = self.xViewSel.get()
         ySel = self.yViewSel.get()
         newView = [ xSel,ySel ]
-        print("DEBUG: newView: "+str(newView))
+        #print("DEBUG: newView: "+str(newView))
 
         DA.setView( view=None, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
