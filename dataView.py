@@ -113,10 +113,11 @@ class PageThree(tk.Frame):
         button1.pack()
 
         self.DA = DA
+        self.isSafeToUpdate = False
 
         ''' Add menu item to load data '''
         filemenu = controller.filemenu
-        filemenu.insert_command(index=1,label="Load", command=self.loadFileData)
+        filemenu.insert_command(index=1,label="Load", command=self.load)
 
         self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
@@ -150,17 +151,21 @@ class PageThree(tk.Frame):
         self.dataWindowStartWidget.bind("<ButtonRelease-1>", self.updateEvent)
         self.dataWindowStartWidget.pack()
         ''' Data View Index  '''
+        #TODO 
         ''' Data View X Widget '''
         self.xViewSel = tk.StringVar(self)
         self.xViewSel.set("No data") # default value
         self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, "No Data" )
         self.dataViewXwidget.configure(state="disabled")
         self.dataViewXwidget.pack()
+        self.xViewSel.trace('w', self.viewChangeTrace) # set up event
         ''' Data View Y Widget '''
         self.yViewSel = tk.StringVar(self)
         self.yViewSel.set("No data") # default value
         self.dataViewYwidget = tk.OptionMenu(self, self.yViewSel, "No Data" )
         self.dataViewYwidget.configure(state="disabled")
+        self.dataViewYwidget.pack()
+        self.yViewSel.trace('w', self.viewChangeTrace) # set up event
 
     def postLoad(self) :
         ''' Things to run after loading a new DataAnalyser object.
@@ -168,6 +173,8 @@ class PageThree(tk.Frame):
         self.updateLabels() # get new data types from data loaded
         view = self.DA.getView() # retrieve the default view after load
         self.setView(view) # configure GUI to reflect new data
+        self.isSafeToUpdate = True
+        print("DEBUG: postLoad: isSafeToUpdate", self.isSafeToUpdate)
         ''' now, set the window '''
         #TODO use data values instead of index values
         limitDict=self.DA.getIndexLimits()
@@ -188,6 +195,13 @@ class PageThree(tk.Frame):
         self.dataWindowStartWidget.config(from_=minVal, to=maxSize-size)
         self.dataWindowStartWidget.set(start)
 
+    def load(self,*args,**kwargs) :
+        ''' catch all load method
+        Currently, the only implemented mode is CSV file data.
+        '''
+        self.isSafeToUpdate = False
+        self.loadFileData()
+
     def loadFileData(self) :
         ''' Show a dialog to select a file and load it.
         '''
@@ -200,6 +214,7 @@ class PageThree(tk.Frame):
         ''' Update labels from the DataAnalyser object
         Call whenever DA is loaded/changed.
         '''
+        print("DEBUG: updateLabels: isSafeToUpdate:", self.isSafeToUpdate)
         if not self.DA.isLoaded :
             return DataNotLoaded()
         newLabels = DA.getLabels()
@@ -209,16 +224,29 @@ class PageThree(tk.Frame):
         self.dataViewYwidget['menu'].delete(0, tk.END)
         ''' Relabel the drop down menus'''
         for label in newLabels :
-            self.dataViewXwidget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) )
-            self.dataViewYwidget['menu'].add_command( label=label, command=lambda : self.yViewSel.set(label) )
+            print("DEBUG: adding label to option menu:",label)
+            self.dataViewXwidget['menu'].add_command( label=label, command=tk._setit(self.xViewSel,label) )
+            self.dataViewYwidget['menu'].add_command( label=label, command=tk._setit(self.yViewSel,label) )
+            #self.dataViewXwidget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) ) # wrong!
+            #self.dataViewYwidget['menu'].add_command( label=label, command=lambda : self.yViewSel.set(label) ) # wrong!
         ''' re-enable widgets '''
         self.dataViewXwidget.configure(state="normal") # enable widget
         self.dataViewYwidget.configure(state="normal") # enable widget
+
+    def viewChangeTrace(self, *args):
+        print("DEBUG: viewChange: isSafeToUpdate", self.isSafeToUpdate)
+        if not self.isSafeToUpdate :
+            print("DEBUG: viewChangeTrace: not safe, returning")
+            return
+        newx, newy = ( self.xViewSel.get(), self.yViewSel.get() )
+        print("DEBUG: viewChangeTrace: new selection:",str((newx,newy)) )
+        self.updateEvent(None)
 
     def setView(self, view) :
         ''' Set the GUI representation of the current data view
         Takes a "view" object and sets the GUI so that it matches.
         '''
+        self.isSafeToUpdate = False
         print("DEBUG: DataViewApp: setView: "+str(view))
         self.xViewSel.set(view[0])
         self.yViewSel.set(view[1])
@@ -243,7 +271,7 @@ class PageThree(tk.Frame):
         xSel = self.xViewSel.get()
         ySel = self.yViewSel.get()
         newView = [ xSel,ySel ]
-        #print("DEBUG: newView: "+str(newView))
+        print("DEBUG: updateEvent: newView: "+str(newView))
 
         DA.setView( view=None, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
@@ -273,6 +301,7 @@ def popupmsg(msg):
 
 def quitHandler():
     print("Quitting...")
+    #TODO Call root window.quit()
     quit()
 
 app = DataViewApp()
