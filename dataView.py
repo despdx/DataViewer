@@ -159,8 +159,7 @@ class PageThree(tk.Frame):
         ''' Data View Y Widget '''
         self.yViewSel = tk.StringVar(self)
         self.yViewSel.set("No data") # default value
-        self.dataViewYwidget = tk.OptionMenu(self, self.xViewSel, "No Data" )
-        self.dataViewYwidget.pack()
+        self.dataViewYwidget = tk.OptionMenu(self, self.yViewSel, "No Data" )
         self.dataViewYwidget.configure(state="disabled")
 
     def postLoad(self) :
