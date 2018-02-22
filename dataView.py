@@ -180,10 +180,10 @@ class PageThree(tk.Frame):
 
     def setWindow(self, minVal=0, start=0, maxSize=10, size=10) :
         ''' set the GUI values that correspond to the window '''
-        print("DEBUG: setWindow:"+str(minVal)
-                +", start:"+str(start)
-                +", maxSize:"+str(maxSize)
-                +", size"+str(size) )
+        #print("DEBUG: setWindow:"+str(minVal)
+        #        +", start:"+str(start)
+        #        +", maxSize:"+str(maxSize)
+        #        +", size"+str(size) )
         self.dataWindowSizeWidget.config(from_=1, to=maxSize-start)
         self.dataWindowSizeWidget.set(size)
         self.dataWindowStartWidget.config(from_=minVal, to=maxSize-size)
@@ -216,11 +216,6 @@ class PageThree(tk.Frame):
         self.dataViewXwidget.configure(state="normal") # enable widget
         self.dataViewYwidget.configure(state="normal") # enable widget
 
-    def updateListWidget(self, listWidget, listValues ) :
-        END = tk.END
-        for item in listValues :
-            listWidget.insert(END,item)
-
     def setView(self, view) :
         ''' Set the GUI representation of the current data view
         Takes a "view" object and sets the GUI so that it matches.
@@ -240,7 +235,7 @@ class PageThree(tk.Frame):
         newWinSize = self.dataWindowSizeWidget.get()
         newWinStart = self.dataWindowStartWidget.get()
         limitDict=self.DA.getIndexLimits()
-        print("DEBUG: updateEvent: got limits: "+str(limitDict))
+        #print("DEBUG: updateEvent: got limits: "+str(limitDict))
         maxSize, minVal = ( limitDict['max'] , limitDict['min'] )
         self.setWindow( minVal=minVal, start=newWinStart,
                         maxSize=maxSize, size=newWinSize )
