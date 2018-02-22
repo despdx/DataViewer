@@ -21,8 +21,8 @@ class DataAnalyser(object):
         if initObj :
             ''' Try to initialize the data object with the first passed argument '''
             self.df = pd.DataFrame(initObj)
-            self.__setDefaultConfig()
             self.isLoaded = True
+            self.__setDefaultConfig()
         else :
             ''' Otherwise, empty'''
             self.isLoaded = False
@@ -37,6 +37,7 @@ class DataAnalyser(object):
         ''' Create a default view of the fist column only.  One column is
         techincally okay, but, rest of implimentation may assume otherwise.
         '''
+        columns = self.df.columns
         self.currentView = columns[0:1].tolist()
         if columns.size > 1 :
             self.currentView = columns[0:2].tolist()
@@ -45,8 +46,8 @@ class DataAnalyser(object):
         x = np.arange(100)
         y = np.random.rand(100)
         self.df = pd.DataFrame( {'x':x, 'y':y} )
-        self.__setDefaultConfig()
         self.isLoaded = True
+        self.__setDefaultConfig()
         
 
     def load_csv(self, *args, **kwargs):
@@ -55,6 +56,7 @@ class DataAnalyser(object):
         columns = data.columns.tolist()
         self.df = data
         self.isLoaded = True
+        self.__setDefaultConfig()
 
 ##    def load(self, filetype='csv', filename=None, *args, **kwargs)##:
 ##        self.df = None
@@ -103,6 +105,9 @@ class DataAnalyser(object):
                 print("WARNING: cannot set index type: " +str(windowType))
                 print("The only supported index type is: index.")
             #self.windowType = windowType
+
+    def getView(self) :
+        return self.currentView
     
     def getViewData(self) :
         if not self.isLoaded :

@@ -18,7 +18,7 @@ LARGE_FONT = ("Times", 12)
 filename = "No File Loaded"
 from DataAnalyser.DataAnalyser import DataAnalyser
 DA = DataAnalyser()
-DA.load_csv('data.csv', index_col=0)
+#DA.load_csv('data.csv', index_col=0)
 #print("DA has data member: " + str(DA.data) )
 #data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
 #labels = ['x','y']
@@ -52,13 +52,17 @@ class DataViewApp(tk.Tk):
         menubar = tk.Menu(container)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save settings", command=lambda: popupmsg('Not supported just yet!'))
-        filemenu.add_command(label="Load", command=self.loadData)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=quit)
         menubar.add_cascade(label="File", menu=filemenu)
+        self.menubar = menubar
+        self.filemenu = filemenu
 
         ''' Finish Menu bar '''
         tk.Tk.config(self,menu=menubar)
+
+        ''' Intialize Data Viewer '''
+        self.DA = DA
 
         ''' Make a dictionary of different frame types (classes) that
         we will use for the application.
@@ -72,9 +76,6 @@ class DataViewApp(tk.Tk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
-        ''' Intialize Data Viewer '''
-        self.DA = 'no data'
-
         ''' Show the starting frame type on init '''
         self.show_frame(PageThree)
 
@@ -85,10 +86,6 @@ class DataViewApp(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
         #frame.updateEvent(None)
-
-    def loadData(self, event) :
-        loadData()
-        self.show_frame(PageThree)
 
 class StartPage(tk.Frame):
 
@@ -114,6 +111,12 @@ class PageThree(tk.Frame):
         button1 = ttk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
+
+        self.DA = DA
+
+        ''' Add menu item to load data '''
+        filemenu = controller.filemenu
+        filemenu.insert_command(index=1,label="Load", command=self.loadFileData)
 
         self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
@@ -150,37 +153,57 @@ class PageThree(tk.Frame):
         ''' Data View X Widget '''
         self.xViewSel = tk.StringVar(self)
         self.xViewSel.set("No data") # default value
-        self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, "Select a data type for the hoizontal axis.")
+        self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, "No Data" )
         self.dataViewXwidget.configure(state="disabled")
         self.dataViewXwidget.pack()
         ''' Data View Y Widget '''
         self.yViewSel = tk.StringVar(self)
         self.yViewSel.set("No data") # default value
-        self.dataViewYwidget = tk.OptionMenu(self, self.xViewSel, "Select a data type for the veritical axis.")
+        self.dataViewYwidget = tk.OptionMenu(self, self.xViewSel, "No Data" )
         self.dataViewYwidget.pack()
         self.dataViewYwidget.configure(state="disabled")
 
+    def postLoad(self) :
+        self.updateLabels() # get new data types from data loaded
+        view = self.DA.getView() # retrieve the default view after load
+        self.setView(view) # configure GUI to reflect new data
+
+    def loadFileData(self) :
+        name = filedialog.askopenfilename()
+        print("Got filename:" +name)
+        loadData(name)
+        self.postLoad()
+
     def updateLabels(self) :
-        if not self.isLoaded :
+        if not self.DA.isLoaded :
             return DataNotLoaded()
         newLabels = DA.getLabels()
-        self.xViewSel = '' # clear x view selection
-        self.yViewSel = '' # clear y view selection
+        print("DEBUG: got label list from DA: "+str(newLabels))
+        ''' Delete old options from menu '''
+        self.dataViewXwidget['menu'].delete(0, tk.END)
+        self.dataViewYwidget['menu'].delete(0, tk.END)
         ''' Relabel the drop down menus'''
-        for label in  newLabels :
-            for widget in [ self.dataViewXwidget , self.dataViewYwidget ] :
-                ''' Adds each lable to the menu, and creates an action to set the
-                selection variable to the appropriate value when selected '''
-                widget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) )
-                widget.configure(state="normal") # enable widget
+        for label in newLabels :
+            self.dataViewXwidget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) )
+            self.dataViewYwidget['menu'].add_command( label=label, command=lambda : self.yViewSel.set(label) )
+        ''' re-enable widgets '''
+        self.dataViewXwidget.configure(state="normal") # enable widget
+        self.dataViewYwidget.configure(state="normal") # enable widget
 
     def updateListWidget(self, listWidget, listValues ) :
         END = tk.END
         for item in listValues :
             listWidget.insert(END,item)
 
+    def setView(self, view) :
+        ''' Set the GUI representation of the current data view '''
+        self.xViewSel.set(view[0])
+        #self.dataViewXwidget.pack()
+        self.yViewSel.set(view[1])
+        #self.dataViewYwidget.pack()
+
     def updateEvent(self, event):
-        if not self.isLoaded :
+        if not self.DA.isLoaded :
             return DataNotLoaded()
         DA = self.DA
         newWinSize = self.dataWindowSizeWidget.get()
@@ -189,8 +212,8 @@ class PageThree(tk.Frame):
         lastStart = lastIndex - newWinSize
 
         ''' set view '''
-        ySel = self.dataViewYwidget.curselection()
-        xSel = self.dataViewXwidget.curselection()
+        xSel = self.xViewSel.get()
+        ySel = self.yViewSel.get()
         newView = [ xSel,ySel ]
         print("DEBUG: newView: "+str(newView))
 
@@ -206,16 +229,10 @@ class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
         Exception.__init__(self,*args,**kwargs)
 
-def loadData(event):
+def loadData(filename):
     global DA
-    global labels
-
-    name = filedialog.askopenfilename()
-    print("Got filename:" +name)
-    DA.load_csv(filename, header=self.headerRow)
-    labels = DA.getLabels()
-    return labels
-
+    print("DEBUG: DataViewer: loadData: loading data")
+    DA.load_csv(filename)
 
 def popupmsg(msg):
     popup = tk.Tk()
