@@ -173,14 +173,20 @@ class PageThree(tk.Frame):
         #TODO use data values instead of index values
         limitDict=self.DA.getIndexLimits()
         maxSize, minVal = ( limitDict['max'] , limitDict['min'] )
+        #print( "DEBUG: postLoad: maxSize: "+str(maxSize) )
+        #print( "DEBUG: postLoad: minValue: "+str(minVal) )
         self.setWindow( minVal=minVal, start=0,
-                        maxSize=maxSize, size=maxSize/2) # reset the GUI window
+                        maxSize=maxSize, size=int(maxSize/2)) # reset the GUI window
 
     def setWindow(self, minVal=0, start=0, maxSize=10, size=10) :
         ''' set the GUI values that correspond to the window '''
-        self.dataWindowSizeWidget.config(from_=1, to=maxSize)
+        print("DEBUG: setWindow:"+str(minVal)
+                +", start:"+str(start)
+                +", maxSize:"+str(maxSize)
+                +", size"+str(size) )
+        self.dataWindowSizeWidget.config(from_=1, to=maxSize-start)
         self.dataWindowSizeWidget.set(size)
-        self.dataWindowStartWidget.config(from_=minVal, to=size-start)
+        self.dataWindowStartWidget.config(from_=minVal, to=maxSize-size)
         self.dataWindowStartWidget.set(start)
 
     def loadFileData(self) :
@@ -234,6 +240,7 @@ class PageThree(tk.Frame):
         newWinSize = self.dataWindowSizeWidget.get()
         newWinStart = self.dataWindowStartWidget.get()
         limitDict=self.DA.getIndexLimits()
+        print("DEBUG: updateEvent: got limits: "+str(limitDict))
         maxSize, minVal = ( limitDict['max'] , limitDict['min'] )
         self.setWindow( minVal=minVal, start=newWinStart,
                         maxSize=maxSize, size=newWinSize )
