@@ -6,6 +6,8 @@ them out for easier analysis.
 #TODO chop
 #TODO wider sliders
 #TODO animation
+#TODO Alternate indexes
+#TODO secondary views
 #TODO configuration
 
 import matplotlib as mpl
@@ -22,6 +24,7 @@ from tkinter import ttk
 from tkinter import filedialog
 
 LARGE_FONT = ("Times", 12)
+NORM_FONT = ("Times", 10)
 
 filename = "No File Loaded"
 from DataAnalyser.DataAnalyser import DataAnalyser
@@ -134,6 +137,7 @@ class PageThree(tk.Frame):
         self.addMainFigure()    # Add main figure area to frame
         self.addDataWindow()    # Add widgets for setting data window
         self.addDataView()      # Add widgets for setting data view
+        self.addChop()          # Add chop button
 
     def addDataView(self) :
         ''' Data View Index  '''
@@ -181,6 +185,11 @@ class PageThree(tk.Frame):
         toolbar = NavigationToolbar2TkAgg(self.canvas, self)
         toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def addChop(self) :
+        chopBW = tk.Button(self, text="Chop", command=self.doChop)
+        chopBW.pack()
+        self.chopButtonW = chopBW
 
     def postLoad(self) :
         ''' Things to run after loading a new DataAnalyser object.
@@ -296,6 +305,9 @@ class PageThree(tk.Frame):
         self.ax.clear()
         self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
         self.fig.canvas.show()
+
+    def doChop(self) :
+        popupmsg("Not yet implemented.")
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
