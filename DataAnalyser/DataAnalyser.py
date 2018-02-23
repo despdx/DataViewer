@@ -5,6 +5,11 @@ Data Analyser Helper
 '''
 #TODO add chop capability
 #TODO configuration
+#TODO polymorphic load
+#TODO multi-key HDF5 instead of many files
+#TODO linear fit, view
+#TODO quadratic fit, view
+#TODO ML fits
 
 import pandas as pd
 import numpy as np
@@ -21,8 +26,9 @@ class DataAnalyser(object):
 
     isLoaded = False
     configDefault = {
-            "chopDirectory"         : '.',
-            "chopFilenamePrefix"    : 'chop'
+            "chopDirectory"         : '.'
+            ,"chopFilenamePrefix"    : 'chop'
+            ,"hdfKey"                : 'chop'
             }
 
     def __init__(self, initObj=None, *args, **kwargs):
@@ -41,7 +47,7 @@ class DataAnalyser(object):
 
     def __setDefaultView(self):
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: __setDefaultConfig: no data loaded")
+            raise DataNotLoaded("ERROR: DataAnalyser: __setDefaultView: no data loaded")
         self.windowStart = 0
         self.windowSize = self.df.shape[0]
         self.windowType = 'index'
@@ -59,8 +65,7 @@ class DataAnalyser(object):
         y = np.random.rand(100)
         self.df = pd.DataFrame( {'x':x, 'y':y} )
         self.isLoaded = True
-        self.__setDefaultConfig()
-        
+        self.__setDefaultView()
 
     def load_csv(self, *args, **kwargs):
         data = pd.DataFrame.from_csv(*args, **kwargs)
@@ -68,7 +73,7 @@ class DataAnalyser(object):
         self.df = data
         self.isLoaded = True
         self.cleanData()
-        self.__setDefaultConfig()
+        self.__setDefaultView()
 
 ##    def load(self, filetype='csv', filename=None, *args, **kwargs)##:
 ##        self.df = None
@@ -193,7 +198,7 @@ class DataAnalyser(object):
                 axThree = data[labelThree].plot(x=self.altIndexCol, y=labelThree)
         return (axMain, axTwo, axThree)
 
-    def chop() :
+    def chop(self) :
         if not self.isLoaded :
             raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         view = self.currentView
@@ -201,7 +206,7 @@ class DataAnalyser(object):
         hdfKey = self.config[ 'hdfKey' ]
         xMin, xMax = (self.windowStart, self.windowStart + self.windowSize)
         prefix = self.config['chopFilenamePrefix']
-        filename = "{0}_{1}:{1:d}:{3:d}.{4}".format(prefix,xLabel,xMin,xMax,"hdf5")
+        filename = "{0}_{1}:{2:d}:{3:d}.{4}".format(prefix,xLabel,xMin,xMax,"hdf5")
         print("DEBUG: DataAnalyser: chop: writing to file:",filename)
         self.df.to_hdf( filename, mode='w', key=hdfKey, data_columns = view )
 
