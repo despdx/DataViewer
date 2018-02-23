@@ -6,6 +6,7 @@ them out for easier analysis.
 #TODO chop
 #TODO wider sliders
 #TODO animation
+#TODO configuration
 
 import matplotlib as mpl
 mpl.use("TkAgg")
@@ -111,52 +112,30 @@ class PageThree(tk.Frame):
     #TODO : organize default values
 
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
+        tk.Frame.__init__(self, parent) # call class parent
+
+        ''' Initialize data members '''
+        self.DA = DA
+        self.isSafeToUpdate = False
+
+        ''' Create label for frame '''
+        label = tk.Label(self, text="Data View", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
 
+        ''' Create button to go back to other frame '''
         button1 = ttk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
-
-        self.DA = DA
-        self.isSafeToUpdate = False
 
         ''' Add menu item to load data '''
         filemenu = controller.filemenu
         filemenu.insert_command(index=1,label="Load", command=self.load)
 
-        self.fig = plt.figure(figsize=(5,4), dpi=100)
-        self.ax = self.fig.add_subplot(111)
-        #df = DA.getViewData()
-        #defViewX = DA.currentView[0]
-        #defViewY = DA.currentView[1]
-        #print("DEBUG: defalt view: "+str([defViewX,defViewY]))
-        #x = df[defViewX]
-        #y = df[defViewY]
-        #self.ax.plot(x, y, 'bo-')
-        self.ax.set_title('No data')
-        self.fig.canvas.show()
+        self.addMainFigure()    # Add main figure area to frame
+        self.addDataWindow()    # Add widgets for setting data window
+        self.addDataView()      # Add widgets for setting data view
 
-        self.canvas = FigureCanvasTkAgg(self.fig, self)
-        #self.canvas.mpl_connect('
-        self.canvas.show()
-        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-
-        toolbar = NavigationToolbar2TkAgg(self.canvas, self)
-        toolbar.update()
-        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-        ''' Data Window Size Widget '''
-        self.dataWindowSizeWidget = tk.Scale(self, from_=1, to=10, resolution=1,
-                orient="horizontal")
-        self.dataWindowSizeWidget.bind("<ButtonRelease-1>", self.updateEvent)
-        self.dataWindowSizeWidget.pack()
-        ''' Data Window Start Widget '''
-        self.dataWindowStartWidget = tk.Scale(self, from_=0, to=10, resolution=1,
-                orient="horizontal")
-        self.dataWindowStartWidget.bind("<ButtonRelease-1>", self.updateEvent)
-        self.dataWindowStartWidget.pack()
+    def addDataView(self) :
         ''' Data View Index  '''
         #TODO 
         ''' Data View X Widget '''
@@ -173,6 +152,35 @@ class PageThree(tk.Frame):
         self.dataViewYwidget.configure(state="disabled")
         self.dataViewYwidget.pack()
         self.yViewSel.trace('w', self.viewChangeTrace) # set up event
+
+    def addDataWindow(self) :
+        ''' Data Window Size Widget '''
+        self.dataWindowSizeWidget = tk.Scale(self, from_=1, to=10, resolution=1,
+                orient="horizontal")
+        self.dataWindowSizeWidget.bind("<ButtonRelease-1>", self.updateEvent)
+        self.dataWindowSizeWidget.pack()
+        ''' Data Window Start Widget '''
+        self.dataWindowStartWidget = tk.Scale(self, from_=0, to=10, resolution=1,
+                orient="horizontal")
+        self.dataWindowStartWidget.bind("<ButtonRelease-1>", self.updateEvent)
+        self.dataWindowStartWidget.pack()
+
+    def addMainFigure(self) :
+        ''' Add main figure area '''
+        self.fig = plt.figure(figsize=(5,4), dpi=100)
+        self.ax = self.fig.add_subplot(111)
+        self.ax.set_title('No data')
+        self.fig.canvas.show()
+
+        self.canvas = FigureCanvasTkAgg(self.fig, self)
+        #TODO animation
+        #self.canvas.mpl_connect('
+        self.canvas.show()
+        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+        toolbar = NavigationToolbar2TkAgg(self.canvas, self)
+        toolbar.update()
+        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def postLoad(self) :
         ''' Things to run after loading a new DataAnalyser object.
