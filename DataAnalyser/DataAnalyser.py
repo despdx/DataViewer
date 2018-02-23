@@ -3,6 +3,7 @@
 Data Analyser Helper
 
 '''
+#TODO add chop capability
 
 import pandas as pd
 import numpy as np

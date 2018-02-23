@@ -1,4 +1,11 @@
 #!/usr/bin/python3
+''' DataView Application
+Just helps looking at large data groups and finding useful bits, and separating
+them out for easier analysis.
+'''
+#TODO chop
+#TODO wider sliders
+#TODO animation
 
 import matplotlib as mpl
 mpl.use("TkAgg")
