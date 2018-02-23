@@ -273,10 +273,11 @@ class PageThree(tk.Frame):
         newView = [ xSel,ySel ]
         print("DEBUG: updateEvent: newView: "+str(newView))
 
-        DA.setView( view=None, windowStart=newWinStart, windowSize=newWinSize,
+        DA.setView( view=newView, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
 
         df = DA.getViewData()
+        print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
         self.ax.clear()
         self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
         self.fig.canvas.show()
