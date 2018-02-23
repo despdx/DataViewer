@@ -4,6 +4,7 @@ Data Analyser Helper
 
 '''
 #TODO add chop capability
+#TODO configuration
 
 import pandas as pd
 import numpy as np
@@ -18,17 +19,27 @@ class DataAnalyser(object):
     Helper object for reading some common data types and exploring them.
     '''
 
+    isLoaded = False
+    configDefault = {
+            "chopDirectory"         : '.',
+            "chopFilenamePrefix"    : 'chop'
+            }
+
     def __init__(self, initObj=None, *args, **kwargs):
+        self.config = self.configDefault
         if initObj :
             ''' Try to initialize the data object with the first passed argument '''
             self.df = pd.DataFrame(initObj)
             self.isLoaded = True
-            self.__setDefaultConfig()
+            self.__setDefaultView()
         else :
             ''' Otherwise, empty'''
-            self.isLoaded = False
+            pass
+        if kwargs is not None :
+            for key,val in kwargs.items() :
+                self.config[key] = val
 
-    def __setDefaultConfig(self):
+    def __setDefaultView(self):
         if not self.isLoaded :
             raise DataNotLoaded("ERROR: DataAnalyser: __setDefaultConfig: no data loaded")
         self.windowStart = 0
@@ -36,7 +47,7 @@ class DataAnalyser(object):
         self.windowType = 'index'
         self.altIndexCol = 'index'
         ''' Create a default view of the fist column only.  One column is
-        techincally okay, but, rest of implimentation may assume otherwise.
+        technically okay, but, rest of implementation may assume otherwise.
         '''
         columns = self.df.columns
         self.currentView = columns[0:1].tolist()
@@ -75,7 +86,7 @@ class DataAnalyser(object):
     def cleanData(self) :
         #data.dropna(inplace=True)
         #data.reset_index(drop=True)
-        print("Not yet implimented.")
+        print("Not yet implemented.")
 
     def getColumnList(self) :
         if not self.isLoaded :
@@ -181,6 +192,18 @@ class DataAnalyser(object):
             if len(self.currentView) > 1 :
                 axThree = data[labelThree].plot(x=self.altIndexCol, y=labelThree)
         return (axMain, axTwo, axThree)
+
+    def chop() :
+        if not self.isLoaded :
+            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+        view = self.currentView
+        xLabel = view[0]
+        hdfKey = self.config[ 'hdfKey' ]
+        xMin, xMax = (self.windowStart, self.windowStart + self.windowSize)
+        prefix = self.config['chopFilenamePrefix']
+        filename = "{0}_{1}:{1:d}:{3:d}.{4}".format(prefix,xLabel,xMin,xMax,"hdf5")
+        print("DEBUG: DataAnalyser: chop: writing to file:",filename)
+        self.df.to_hdf( filename, mode='w', key=hdfKey, data_columns = view )
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
