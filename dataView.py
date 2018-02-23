@@ -7,6 +7,7 @@ them out for easier analysis.
 #TODO Alternate indexes
 #TODO secondary views
 #TODO configuration
+#TODO show summary statistics for view
 
 import matplotlib as mpl
 mpl.use("TkAgg")
@@ -160,11 +161,13 @@ class PageThree(tk.Frame):
         self.dataWindowSizeWidget = tk.Scale(self, from_=1, to=10, resolution=1,
                 orient="horizontal")
         self.dataWindowSizeWidget.bind("<ButtonRelease-1>", self.updateEvent)
+        self.dataWindowSizeWidget.bind("<Button1-Motion>", self.updateEvent)
         self.dataWindowSizeWidget.pack(fill=tk.X,expand=1)
         ''' Data Window Start Widget '''
         self.dataWindowStartWidget = tk.Scale(self, from_=0, to=10, resolution=1,
                 orient="horizontal")
         self.dataWindowStartWidget.bind("<ButtonRelease-1>", self.updateEvent)
+        self.dataWindowStartWidget.bind("<Button1-Motion>", self.updateEvent)
         self.dataWindowStartWidget.pack(fill=tk.X,expand=1)
 
     def addMainFigure(self) :

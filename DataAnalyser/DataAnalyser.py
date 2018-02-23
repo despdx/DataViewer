@@ -3,11 +3,13 @@
 Data Analyser Helper
 
 '''
+#TODO linear fit, view
+#TODO scaling (unit conversion)
 #TODO configuration
 #TODO polymorphic load
 #TODO multi-key HDF5 instead of many files
-#TODO linear fit, view
 #TODO quadratic fit, view
+#TODO Summary statistics
 #TODO ML fits
 
 import pandas as pd
