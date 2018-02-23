@@ -52,10 +52,10 @@ class DataAnalyser(object):
 
     def load_csv(self, *args, **kwargs):
         data = pd.DataFrame.from_csv(*args, **kwargs)
-        data = data.dropna()
         columns = data.columns.tolist()
         self.df = data
         self.isLoaded = True
+        self.cleanData()
         self.__setDefaultConfig()
 
 ##    def load(self, filetype='csv', filename=None, *args, **kwargs)##:
@@ -70,6 +70,11 @@ class DataAnalyser(object):
 ##        ''' Load the file with Pandas '''
 ##        loadFunc = filetypes[filetype]
 ##        self.df = loadFunc(path=filename, args, kwargs)
+
+    def cleanData(self) :
+        #data.dropna(inplace=True)
+        #data.reset_index(drop=True)
+        print("Not yet implimented.")
 
     def getColumnList(self) :
         if not self.isLoaded :
