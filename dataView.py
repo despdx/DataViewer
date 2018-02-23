@@ -174,7 +174,7 @@ class PageThree(tk.Frame):
         view = self.DA.getView() # retrieve the default view after load
         self.setView(view) # configure GUI to reflect new data
         self.isSafeToUpdate = True
-        print("DEBUG: postLoad: isSafeToUpdate", self.isSafeToUpdate)
+        #print("DEBUG: postLoad: isSafeToUpdate", self.isSafeToUpdate)
         ''' now, set the window '''
         #TODO use data values instead of index values
         limitDict=self.DA.getIndexLimits()
@@ -214,17 +214,17 @@ class PageThree(tk.Frame):
         ''' Update labels from the DataAnalyser object
         Call whenever DA is loaded/changed.
         '''
-        print("DEBUG: updateLabels: isSafeToUpdate:", self.isSafeToUpdate)
+        #print("DEBUG: updateLabels: isSafeToUpdate:", self.isSafeToUpdate)
         if not self.DA.isLoaded :
             return DataNotLoaded()
         newLabels = DA.getLabels()
-        print("DEBUG: got label list from DA: "+str(newLabels))
+        #print("DEBUG: got label list from DA: "+str(newLabels))
         ''' Delete old options from menu '''
         self.dataViewXwidget['menu'].delete(0, tk.END)
         self.dataViewYwidget['menu'].delete(0, tk.END)
         ''' Relabel the drop down menus'''
         for label in newLabels :
-            print("DEBUG: adding label to option menu:",label)
+            #print("DEBUG: adding label to option menu:",label)
             self.dataViewXwidget['menu'].add_command( label=label, command=tk._setit(self.xViewSel,label) )
             self.dataViewYwidget['menu'].add_command( label=label, command=tk._setit(self.yViewSel,label) )
             #self.dataViewXwidget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) ) # wrong!
@@ -234,12 +234,12 @@ class PageThree(tk.Frame):
         self.dataViewYwidget.configure(state="normal") # enable widget
 
     def viewChangeTrace(self, *args):
-        print("DEBUG: viewChange: isSafeToUpdate", self.isSafeToUpdate)
+        #print("DEBUG: viewChange: isSafeToUpdate", self.isSafeToUpdate)
         if not self.isSafeToUpdate :
-            print("DEBUG: viewChangeTrace: not safe, returning")
+            #print("DEBUG: viewChangeTrace: not safe, returning")
             return
         newx, newy = ( self.xViewSel.get(), self.yViewSel.get() )
-        print("DEBUG: viewChangeTrace: new selection:",str((newx,newy)) )
+        #print("DEBUG: viewChangeTrace: new selection:",str((newx,newy)) )
         self.updateEvent(None)
 
     def setView(self, view) :
@@ -247,7 +247,7 @@ class PageThree(tk.Frame):
         Takes a "view" object and sets the GUI so that it matches.
         '''
         self.isSafeToUpdate = False
-        print("DEBUG: DataViewApp: setView: "+str(view))
+        #print("DEBUG: DataViewApp: setView: "+str(view))
         self.xViewSel.set(view[0])
         self.yViewSel.set(view[1])
         # TODO Set active value in pulldown
@@ -271,13 +271,13 @@ class PageThree(tk.Frame):
         xSel = self.xViewSel.get()
         ySel = self.yViewSel.get()
         newView = [ xSel,ySel ]
-        print("DEBUG: updateEvent: newView: "+str(newView))
+        #print("DEBUG: updateEvent: newView: "+str(newView))
 
         DA.setView( view=newView, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
 
         df = DA.getViewData()
-        print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
+        #print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
         self.ax.clear()
         self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
         self.fig.canvas.show()
@@ -288,7 +288,7 @@ class DataNotLoaded(Exception) :
 
 def loadData(filename):
     global DA
-    print("DEBUG: DataViewer: loadData: loading data")
+    #print("DEBUG: DataViewer: loadData: loading data")
     DA.load_csv(filename)
 
 def popupmsg(msg):
