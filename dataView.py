@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
-#TODO chop
 #TODO wider sliders
 #TODO animation
 #TODO Alternate indexes
@@ -207,6 +206,7 @@ class PageThree(tk.Frame):
         #print( "DEBUG: postLoad: minValue: "+str(minVal) )
         self.setWindow( minVal=minVal, start=0,
                         maxSize=maxSize, size=int(maxSize/2)) # reset the GUI window
+        self.updateEvent(None)      # update GUI
 
     def setWindow(self, minVal=0, start=0, maxSize=10, size=10) :
         ''' set the GUI values that correspond to the window '''
@@ -307,7 +307,7 @@ class PageThree(tk.Frame):
         self.fig.canvas.show()
 
     def doChop(self) :
-        popupmsg("Not yet implemented.")
+        self.DA.chop()
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :

@@ -3,7 +3,6 @@
 Data Analyser Helper
 
 '''
-#TODO add chop capability
 #TODO configuration
 #TODO polymorphic load
 #TODO multi-key HDF5 instead of many files
