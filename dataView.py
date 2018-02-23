@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
-#TODO wider sliders
 #TODO animation
 #TODO Alternate indexes
 #TODO secondary views
@@ -161,12 +160,12 @@ class PageThree(tk.Frame):
         self.dataWindowSizeWidget = tk.Scale(self, from_=1, to=10, resolution=1,
                 orient="horizontal")
         self.dataWindowSizeWidget.bind("<ButtonRelease-1>", self.updateEvent)
-        self.dataWindowSizeWidget.pack()
+        self.dataWindowSizeWidget.pack(fill=tk.X,expand=1)
         ''' Data Window Start Widget '''
         self.dataWindowStartWidget = tk.Scale(self, from_=0, to=10, resolution=1,
                 orient="horizontal")
         self.dataWindowStartWidget.bind("<ButtonRelease-1>", self.updateEvent)
-        self.dataWindowStartWidget.pack()
+        self.dataWindowStartWidget.pack(fill=tk.X,expand=1)
 
     def addMainFigure(self) :
         ''' Add main figure area '''
