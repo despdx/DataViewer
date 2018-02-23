@@ -96,9 +96,10 @@ class DataAnalyser(object):
     def setView(self, view=None, windowStart = None, windowSize=None, windowType=None) :
         if not self.isLoaded :
             raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+        goodLabels = self.getLabels()
         if view is not None :
             for item in view :
-                if item not in self.getLabels():
+                if item not in goodLabels :
                     raise TypeError("ERROR: '"+item+"' not a valid label")
             self.currentView = view
         if windowStart is not None :
