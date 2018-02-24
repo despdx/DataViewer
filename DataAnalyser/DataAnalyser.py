@@ -4,10 +4,12 @@ Data Analyser Helper
 
 '''
 #TODO cross-platform files
-#TODO csv chop
 #TODO configuration
-#TODO linear fit, view
+#TODO configure-able chop directory
+#TODO csv chop
 #TODO scaling (unit conversion)
+#TODO interpret data types, allow filtering
+#TODO linear fit, view
 #TODO polymorphic load
 #TODO multi-key HDF5 instead of many files
 #TODO quadratic fit, view

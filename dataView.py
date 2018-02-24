@@ -3,10 +3,18 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
-#TODO animation
+#TODO disable chop button until loaded
+#TODO start on start frame, show PageThree after load
+#TODO speed up update (without animation)
+#TODO label GUI items
+#TODO label graph
+#TODO configuration
+#TODO scale scales
+#TODO filter data types
+#TODO pick window from figure
 #TODO Alternate indexes
 #TODO secondary views
-#TODO configuration
+#TODO animation
 #TODO show summary statistics for view
 
 import matplotlib as mpl
