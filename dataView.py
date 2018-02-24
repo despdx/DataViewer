@@ -3,6 +3,8 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
+#TODO fix doc strings
+#TODO fix NotImplementedError class
 #TODO disable chop button until loaded
 #TODO start on start frame, show PageThree after load
 #TODO speed up update (without animation)
