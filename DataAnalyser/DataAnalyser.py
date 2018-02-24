@@ -34,22 +34,22 @@ class DataAnalyser(object):
 
     isLoaded = False
     configDef = { # Configuration Definition
-            'chopDirectory'         : { 'default'   : pathlib.PurePath(os.path.curdir)
-                                        ,'type'     : pathlib.PurePath
-                                        ,'limit'    : None
-                                        }
-            ,'chopFilenamePrefix'   : { 'default'   : 'chop'
-                                        ,'type'     : str
-                                        ,'limit'    : (1,256)
-                                        }
-            ,'hdfKey'               : { 'default'   : 'chop'
-                                        ,'type'     : str
-                                        ,'limit'    : (1,128)
-                                        }
-            ,'chopFileFormat'       : { 'default'   : 'hdf'
-                                        ,'type'     : str
-                                        ,'limit'    : (1,10)
-                                        }
+            'chopDirectory'         : {
+                'default'   : pathlib.PurePath(os.path.curdir)
+                ,'func'     : lambda p: isinstance(p,pathlib.PurePath)
+                }
+            ,'chopFilenamePrefix'   : {
+                'default'   : 'chop'
+                ,'func'     : lambda p: isinstance(p,str) and (len(p) >= 1 and len(p) <= 256)
+                }
+            ,'hdfKey'       : {
+                'default'   : 'chop'
+                ,'func'     : lambda p: isinstance(p,str) and (len(p) >= 1 and len(p) <= 64)
+                }
+            ,'chopFileFormat'   : {
+                'default'   : 'hdf'
+                ,'func'     : lambda p: isinstance(p,str) and (len(p) >= 1 and len(p) <= 5)
+                }
             }
 
     def getDefaultConfig(self) :
