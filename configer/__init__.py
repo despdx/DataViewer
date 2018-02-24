@@ -3,6 +3,8 @@
 
 __all__ = [ 'Configer' ]
 
+from functools import wraps
+
 class Configer:
     """A simple helper class for configuration variables.
     
@@ -35,38 +37,30 @@ class Configer:
             if not default[key]['func'](defaultVal) :
                 raise ValueError('New value failed validation: '+str(defaultVal))
             default[key]['currval'] = defaultVal    # copy default to currval
+        # all validation passed, adopt the updated dict as the config
+        self.c = default
 
-        self.c = default                            # adopt validated dict as config
+    @property
+    def c(self, name) :
+        return self.__c[name]
 
-    def set(self, name, value) :
+    @c.setter
+    def c(self, name, value) :
         """Update a configuration stored in configer.
 
         Parameters:
         name : Name/ref/key of the configuration for which to change the value.
         value : The value to which the configuration will be set, after validation.
         """
-        if key not in self.c.keys() :
-            raise NameError('Invalid configuration name:'+str(name))
-        validatorFunc = self.c[name]['func']
-        if not validatorFunc(value) :
-            raise NotImplementedError('Invalid configuration value:'+str(value))
-        self.c[name]['currval'] = value
-
-    def get(self, name) :
-        """Return any value previously stored in configer.
-
-        Parameters:
-        name : Name of configuration to retrieve.
-
-        Returns: Value corresponding to the name/ref/key specified.
-        """
-        if name not in self.c.keys() :
-            raise NameError('Invalid configuration name:'+str(name))
-        return self.c[name]['currval']
+        if self.__c[name]['func'](value) :
+            """ New value passed validation; set value. """
+            self.__c[name]['currval'] = value
+        else :
+            raise ValueError('New value failed validation: '+str(value))
 
     def getConfig(self) :
         """Returns the current configuration, a dictionary """
-        return self.c
+        return self.__c
 
     def isValid(self) :
         """Run all validation functions.  Returns False if any functions fail. """
@@ -75,3 +69,9 @@ class Configer:
             if not validatorFunc(self.c[key]['currval']) :  # validate current value
                 return False 
         return True
+
+def configWrap(wrappedFunc) :
+    @wraps(wrappedFunc)
+    def dec_func(*args, **kwargs) :
+        return wrappedFunc(*args, **kwargs)
+
