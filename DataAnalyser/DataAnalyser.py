@@ -20,6 +20,7 @@ import pandas as pd
 import numpy as np
 import os
 from sys import stderr
+import pathlib
 
 filetypes = {
         'csv': pd.DataFrame.from_csv ,
@@ -32,15 +33,34 @@ class DataAnalyser(object):
     '''
 
     isLoaded = False
-    configDefault = {
-            'chopDirectory'         : '.'
-            ,'chopFilenamePrefix'   : 'chop'
-            ,'hdfKey'               : 'chop'
-            ,'chopFileFormat'       : 'hdf'
+    configDef = { # Configuration Definition
+            'chopDirectory'         : { 'default'   : pathlib.PurePath(os.path.curdir)
+                                        ,'type'     : pathlib.PurePath
+                                        ,'limit'    : None
+                                        }
+            ,'chopFilenamePrefix'   : { 'default'   : 'chop'
+                                        ,'type'     : str
+                                        ,'limit'    : (1,256)
+                                        }
+            ,'hdfKey'               : { 'default'   : 'chop'
+                                        ,'type'     : str
+                                        ,'limit'    : (1,128)
+                                        }
+            ,'chopFileFormat'       : { 'default'   : 'hdf'
+                                        ,'type'     : str
+                                        ,'limit'    : (1,10)
+                                        }
             }
 
+    def getDefaultConfig(self) :
+        defaultDict = dict()
+        for key in self.configDef :
+            defaultDict[key] = self.configDef[key]['default']
+        print("DEBUG: DataAnalyser: getDefaultConfig: ",str(defaultDict),file=stderr)
+        return defaultDict
+
     def __init__(self, initObj=None, *args, **kwargs):
-        self.config = self.configDefault
+        self.config = self.getDefaultConfig()
         if initObj :
             ''' Try to initialize the data object with the first passed argument '''
             self.df = pd.DataFrame(initObj)
@@ -67,6 +87,9 @@ class DataAnalyser(object):
         self.currentView = columns[0:1].tolist()
         if columns.size > 1 :
             self.currentView = columns[0:2].tolist()
+
+    def getConfig(self) :
+        return self.config
 
     def loadRandomData(self) :
         x = np.arange(100)
