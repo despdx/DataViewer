@@ -36,12 +36,9 @@ NORM_FONT = ("Times", 10)
 filename = "No File Loaded"
 from DataAnalyser.DataAnalyser import DataAnalyser
 DA = DataAnalyser()
-#DA.load_csv('data.csv', index_col=0)
-#print("DA has data member: " + str(DA.data) )
-#data = ([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
-#labels = ['x','y']
-#figMain = plt.figure(figsize=(5,4), dpi=100)
-#axMain1 = figMain.add_subplot(111)
+config = {  'configDA'          : DA.getConfig()
+            ,'figMark'          : 'bo-'
+        }
 
 class DataViewApp(tk.Tk):
     ''' Data View Application Class
