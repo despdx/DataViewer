@@ -3,7 +3,6 @@
 Data Analyser Helper
 
 '''
-#TODO export all data when chopping
 #TODO cross-platform files
 #TODO csv chop
 #TODO configuration
@@ -17,6 +16,8 @@ Data Analyser Helper
 
 import pandas as pd
 import numpy as np
+import os
+from sys import stderr
 
 filetypes = {
         'csv': pd.DataFrame.from_csv ,
@@ -30,9 +31,10 @@ class DataAnalyser(object):
 
     isLoaded = False
     configDefault = {
-            "chopDirectory"         : '.'
-            ,"chopFilenamePrefix"    : 'chop'
-            ,"hdfKey"                : 'chop'
+            'chopDirectory'         : '.'
+            ,'chopFilenamePrefix'   : 'chop'
+            ,'hdfKey'               : 'chop'
+            ,'chopFileFormat'       : 'hdf'
             }
 
     def __init__(self, initObj=None, *args, **kwargs):
@@ -205,14 +207,20 @@ class DataAnalyser(object):
     def chop(self) :
         if not self.isLoaded :
             raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
-        view = self.currentView
-        xLabel = view[0]
         hdfKey = self.config[ 'hdfKey' ]
         xMin, xMax = (self.windowStart, self.windowStart + self.windowSize)
         prefix = self.config['chopFilenamePrefix']
-        filename = "{0}_{1}:{2:d}:{3:d}.{4}".format(prefix,xLabel,xMin,xMax,"hdf5")
-        print("DEBUG: DataAnalyser: chop: writing to file:",filename)
-        self.df.to_hdf( filename, mode='w', key=hdfKey, data_columns = view )
+        chopDir = self.config['chopDirectory']
+        fileExt = self.config['chopFileFormat']
+        filename = "{0}_{1:d}:{2:d}.{3}".format(prefix,xMin,xMax,fileExt)
+        chopFilePath = os.path.join( chopDir , filename )
+        print("DEBUG: DataAnalyser: chop: writing to file:",chopFilePath)
+        try :
+            self.df.to_hdf( chopFilePath, mode='w', key=hdfKey )
+        except e :
+            print("ERROR: DataAnalyser: chop: failed writing to file:", chopFilePath, file=stderr )
+            print(e)
+            return
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
