@@ -4,10 +4,14 @@
 __all__ = [ 'Configer' ]
 
 from functools import wraps
+from warnings import warn
+from sys import stderr
+import logging
+logging.basicConfig(level='WARNING')
 
-class Configer:
+class Configer(object):
     """A simple helper class for configuration variables.
-    
+
     Configer stores four properties for every "configuration" the caller
     stores with in it:  name, default value, current value, and a validator
     function.  This is unlimited, so the caller can store as many
@@ -32,46 +36,70 @@ class Configer:
 
         Returns: An initialized Configer object.
         """
+        self.__config = dict()
         for key in default.keys() :
-            defaultVal = default[key]['default']
-            if not default[key]['func'](defaultVal) :
-                raise ValueError('New value failed validation: '+str(defaultVal))
-            default[key]['currval'] = defaultVal    # copy default to currval
-        # all validation passed, adopt the updated dict as the config
-        self.c = default
+            ca = _ConfAtom(default[key])
+            logging.debug('key:'+str(key))
+            logging.debug('ca:'+str(ca))
+            self.__config[key] = ca
 
-    @property
-    def c(self, name) :
-        return self.__c[name]
+    def get(self, name) :
+        """Return value associated with the specified name/key/reference """
+        return self.__config[name]
 
-    @c.setter
-    def c(self, name, value) :
+    def set(self, name, value) :
         """Update a configuration stored in configer.
 
         Parameters:
         name : Name/ref/key of the configuration for which to change the value.
         value : The value to which the configuration will be set, after validation.
         """
-        if self.__c[name]['func'](value) :
-            """ New value passed validation; set value. """
-            self.__c[name]['currval'] = value
-        else :
-            raise ValueError('New value failed validation: '+str(value))
+        self.__config[name] = value
 
     def getConfig(self) :
         """Returns the current configuration, a dictionary """
-        return self.__c
+        return self.__config.copy()
 
     def isValid(self) :
         """Run all validation functions.  Returns False if any functions fail. """
-        for key in self.c.keys() :
-            validatorFunc = self.c[key]['func']             # get validator function
-            if not validatorFunc(self.c[key]['currval']) :  # validate current value
+        c = self.__config
+        for key in c.keys() :
+            if not c[key].isValid() :
                 return False 
         return True
 
-def configWrap(wrappedFunc) :
-    @wraps(wrappedFunc)
-    def dec_func(*args, **kwargs) :
-        return wrappedFunc(*args, **kwargs)
+class _ConfAtom(object):
+    """ Encapsulation class for individual settings """
 
+    def __init__(self, initDict) :
+        d = initDict['default']
+        f = initDict['func']
+        if f(d) :
+            self.__default = d      # store default
+            self.__validator = f    # store validator function
+            self.__ca = d           # make default the current value
+        else :
+            raise ValueError("Default value failed validation: "+d)
+
+    @property
+    def ca(self) :
+        return self.__ca
+
+    @ca.setter
+    def ca(self, newval) :
+        if self.__validator(newval) :
+            self.__ca = newval
+        else :
+            raise ValueError("Value failed validation: "+newval)
+
+    def isValid(self) :
+        if self.__validator(self.__ca) :
+            return True
+        else :
+            return False
+
+    def __repr__(self) :
+        return repr(self.__ca)+'(Instance of _ConfAtom)'
+
+    def __str__(self) :
+        return str(self.__ca)
