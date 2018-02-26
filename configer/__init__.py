@@ -43,18 +43,32 @@ class Configer(object):
             logging.debug('ca:'+str(ca))
             self.__config[key] = ca
 
-    def get(self, name) :
-        """Return value associated with the specified name/key/reference """
-        return self.__config[name]
+    def __getitem__(self, item) :
+        return self.__config[item]
 
-    def set(self, name, value) :
+    def get(self, item) :
+        """Return value associated with the specified name/key/reference """
+        return self.__getitem__(item)
+
+    def __setitem__(self, item, value) :
+        self.__config[item] = value
+
+    def set(self, item, value) :
         """Update a configuration stored in configer.
 
         Parameters:
         name : Name/ref/key of the configuration for which to change the value.
         value : The value to which the configuration will be set, after validation.
         """
-        self.__config[name] = value
+        self.__setitem__(item, value)
+
+    def keys(self):
+        """Return the list of item/names
+
+        This class is basically a wraper for a dict().  So I want to preserve
+        that class functionality.
+        """
+        return self.__config.keys()
 
     def getConfig(self) :
         """Returns the current configuration, a dictionary """
@@ -103,3 +117,12 @@ class _ConfAtom(object):
 
     def __str__(self) :
         return str(self.__ca)
+
+    def __iter__(self) :
+        return self
+
+    def __next__(self) :
+        raise StopIteration
+
+    def next(self) :
+        self.__next__()
