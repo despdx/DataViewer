@@ -4,10 +4,7 @@ Data Analyser Helper
 
 '''
 #(done?)TODO cross-platform files
-#TODO configuration
-#TODO configure-able chop directory
 #TODO remove configuration
-#TODO csv chop
 #TODO scaling (unit conversion)
 #TODO interpret data types, allow filtering
 #TODO linear fit, view

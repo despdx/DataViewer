@@ -10,7 +10,6 @@ them out for easier analysis.
 #TODO speed up update (without animation)
 #TODO label GUI items
 #TODO label graph
-#TODO configuration
 #TODO scale scales
 #TODO filter data types
 #TODO pick window from figure

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """Simple package to help automate setting and checking variables.  """
+#TODO more documentation
 
 __all__ = [ 'Configer' ]
 
