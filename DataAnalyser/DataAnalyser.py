@@ -3,9 +3,10 @@
 Data Analyser Helper
 
 '''
-#TODO cross-platform files
+#(done?)TODO cross-platform files
 #TODO configuration
 #TODO configure-able chop directory
+#TODO remove configuration
 #TODO csv chop
 #TODO scaling (unit conversion)
 #TODO interpret data types, allow filtering
@@ -21,18 +22,48 @@ import numpy as np
 import os
 from sys import stderr
 import pathlib
+from logging import *
+basicConfig(level=WARNING)
+from warnings import warn as warnwarn
+import configer
 
-filetypes = {
-        'csv': pd.DataFrame.from_csv ,
-        }
+def _loadCSV(filename, *args, **kwargs) :
+    return pd.DataFrame.from_csv(filename, *args, **kwargs)
 
+def _loadHDF(filename, *args, **kwargs) :
+    warnwarn('HDF loading not yet implemented.')
+    #store = HDFStore(filename)
+    #store[self.config['hdfKey']]
+
+def _loadRAND(*args, **kwargs) :
+    x = np.arange(100)
+    y = np.random.rand(100)
+    return pd.DataFrame( {'x':x, 'y':y} )
+
+def _writeCSV(pandasDF, filename, *args, **kwargs) :
+    pandasDF.to_csv(filename, *args, **kwargs)
+
+def _writeHDF(pandasDF, filename, *args, **kwargs) :
+    pandasDF.to_hdf(filename, *args, **kwargs)
 
 class DataAnalyser(object):
     '''
     Helper object for reading some common data types and exploring them.
     '''
 
-    isLoaded = False
+    __readTypes = {
+            'csv'       : _loadCSV
+            ,'hdf5'     : _loadHDF
+            ,'hdf'      : _loadHDF
+            ,'rand'     : _loadRAND
+            }
+
+    __writeTypes = {
+            'csv'   : _writeCSV
+            ,'hdf'  : _writeHDF
+            ,'hdf5' : _writeHDF
+            }
+
     configDef = { # Configuration Definition
             'chopDirectory'         : {
                 'default'   : pathlib.PurePath(os.path.curdir)
@@ -47,8 +78,8 @@ class DataAnalyser(object):
                 ,'func'     : lambda p: isinstance(p,str) and (len(p) >= 1 and len(p) <= 64)
                 }
             ,'chopFileFormat'   : {
-                'default'   : 'hdf'
-                ,'func'     : lambda p: isinstance(p,str) and (len(p) >= 1 and len(p) <= 5)
+                'default'   : 'csv'
+                ,'func'     : lambda p: isinstance(p,str) and (p in DataAnalyser.getSupprtedFormats())
                 }
             }
 
@@ -56,13 +87,21 @@ class DataAnalyser(object):
         defaultDict = dict()
         for key in self.configDef :
             defaultDict[key] = self.configDef[key]['default']
-        print("DEBUG: DataAnalyser: getDefaultConfig: ",str(defaultDict),file=stderr)
+        debug("DataAnalyser: getDefaultConfig: "+str(defaultDict))
         return defaultDict
 
+    @staticmethod
+    def getSupprtedFormats() :
+        """ Get a list of supported file extensions that DataAnalyser can read
+        and write.
+        """
+        return DataAnalyser.__readTypes.keys()
+
     def __init__(self, initObj=None, *args, **kwargs):
-        self.config = self.getDefaultConfig()
+        self.isLoaded = False
+        self.__config = configer.Configer(DataAnalyser.configDef)
         if initObj :
-            ''' Try to initialize the data object with the first passed argument '''
+            ''' Initialize the data object with the first passed argument '''
             self.df = pd.DataFrame(initObj)
             self.isLoaded = True
             self.__setDefaultView()
@@ -71,11 +110,11 @@ class DataAnalyser(object):
             pass
         if kwargs is not None :
             for key,val in kwargs.items() :
-                self.config[key] = val
+                self.__config[key] = val
 
     def __setDefaultView(self):
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: __setDefaultView: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: __setDefaultView: no data loaded")
         self.windowStart = 0
         self.windowSize = self.df.shape[0]
         self.windowType = 'index'
@@ -89,61 +128,47 @@ class DataAnalyser(object):
             self.currentView = columns[0:2].tolist()
 
     def getConfig(self) :
-        return self.config
+        return self.__config.getConfig()
 
-    def loadRandomData(self) :
-        x = np.arange(100)
-        y = np.random.rand(100)
-        self.df = pd.DataFrame( {'x':x, 'y':y} )
-        self.isLoaded = True
-        self.__setDefaultView()
+    def load(self, *args, filetype='csv', filename=None, **kwargs):
+        ''' Determine which file to load '''
+        if filename == None :
+            raise Exception('No filename provided.')
+        else :
+            self.filename = filename
 
-    def load_csv(self, *args, **kwargs):
-        data = pd.DataFrame.from_csv(*args, **kwargs)
-        columns = data.columns.tolist()
-        self.df = data
+        ''' Load the file '''
+        loadFunc = DataAnalyser.__readTypes[filetype]
+        self.df = loadFunc(filename, *args, **kwargs)
         self.isLoaded = True
         self.cleanData()
         self.__setDefaultView()
 
-##    def load(self, filetype='csv', filename=None, *args, **kwargs)##:
-##        self.df = None
-##        ''' Determine which file to load '''
-##        if filename == None :
-##            if self.filename == None :
-##                raise Exception('No Filename Given')
-##        else :
-##            self.filename = filename
-##
-##        ''' Load the file with Pandas '''
-##        loadFunc = filetypes[filetype]
-##        self.df = loadFunc(path=filename, args, kwargs)
-
     def cleanData(self) :
         #data.dropna(inplace=True)
         #data.reset_index(drop=True)
-        print("Not yet implemented.")
+        info("Not yet implemented.")
 
     def getColumnList(self) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: getColumnList: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: getColumnList: no data loaded")
         return self.getLabels()
 
     def getLabels(self):
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: getLabels: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: getLabels: no data loaded")
         return self.df.columns
 
     def setAltIndexColumn(self, value):
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: setAltIndexColumn: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: setAltIndexColumn: no data loaded")
         if value not in self.df.columns :
             raise Exception('Invalid Column Name')
         self.altIndexCol = value
 
     def setView(self, view=None, windowStart = None, windowSize=None, windowType=None) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         goodLabels = self.getLabels()
         if view is not None :
             for item in view :
@@ -156,14 +181,14 @@ class DataAnalyser(object):
             self.windowSize = windowSize
         if windowType is not None :
             if not windowType == 'index' :
-                print("WARNING: cannot set index type: " +str(windowType))
-                print("The only supported index type is: index.")
+                warnwarn("Cannot set index type: " +str(windowType))
+                warnwarn("The only supported index type is: index.")
             #self.windowType = windowType
 
     def getIndexLimits(self) :
         #TODO use alternative index
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         return {    'max' : self.df.index.max(),
                     'min' : self.df.index.min() }
 
@@ -172,7 +197,7 @@ class DataAnalyser(object):
 
     def getViewLimits(self) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: getWindowLimits: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: getWindowLimits: no data loaded")
         x,y = self.view
         return {    'xmin' : self.df[x].min(),
                     'ymin' : self.df[y].min(),
@@ -181,7 +206,7 @@ class DataAnalyser(object):
 
     def setWindow(self, start, size) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: setWindow: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: setWindow: no data loaded")
         self.windowStart = start
         self.windowSize = size
 
@@ -190,18 +215,18 @@ class DataAnalyser(object):
 
     def getWindow(self) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: getView: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: getView: no data loaded")
         return ( self.windowStart , self.windowSize )
     
     def getViewData(self) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: getViewData: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: getViewData: no data loaded")
         if self.windowType == 'index' :
             start = self.windowStart
             end = self.windowStart + self.windowSize
             mySlice = slice(start,end)
             df = self.df[mySlice]
-            #print("DEBUG: currentView:"+ str(self.currentView))
+            #debug("currentView:"+ str(self.currentView))
             df = df[ self.currentView ]
             return df
         else:
@@ -209,7 +234,7 @@ class DataAnalyser(object):
 
     def get2DData(self) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: get2DData: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: get2DData: no data loaded")
         return (self.df[self.altIndexCol].values,
                 self.df[self.currentView[0].values],
                 self.df[self.currentView[1].values]
@@ -217,7 +242,7 @@ class DataAnalyser(object):
 
     def getAxes(self) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+            raise _DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         xColName = self.currentView[0]
         yColName = self.currentView[1]
         axMain = data.plot(x=xColName,y=yColName)
@@ -229,24 +254,29 @@ class DataAnalyser(object):
                 axThree = data[labelThree].plot(x=self.altIndexCol, y=labelThree)
         return (axMain, axTwo, axThree)
 
-    def chop(self) :
+    def chop(self, dirpath=pathlib.PurePath(os.path.curdir), fmt='csv'
+            ,hdfKey='chop', prefix='chop', **kwargs) :
         if not self.isLoaded :
-            raise DataNotLoaded("ERROR: DataAnalyser: no data loaded")
-        hdfKey = self.config[ 'hdfKey' ]
+            raise _DataNotLoaded("Data not loaded.")
         xMin, xMax = (self.windowStart, self.windowStart + self.windowSize)
-        prefix = self.config['chopFilenamePrefix']
-        chopDir = self.config['chopDirectory']
-        fileExt = self.config['chopFileFormat']
-        filename = "{0}_{1:d}:{2:d}.{3}".format(prefix,xMin,xMax,fileExt)
-        chopFilePath = os.path.join( chopDir , filename )
-        print("DEBUG: DataAnalyser: chop: writing to file:",chopFilePath)
+        filename = "{0}_{1:d}:{2:d}.{3}".format(prefix,xMin,xMax,fmt)
+        chopFilePath = os.path.join( dirpath , filename )
+        if fmt not in self.__writeTypes.keys() :
+            raise TypeError('Unsupported data format: '+str(fmt))
+        writeFunc = self.__writeTypes[fmt]
+        debug("DataAnalyser: chop: writing to file:"+chopFilePath)
+        df = self.df
+        altIndex = self.altIndexCol
         try :
-            self.df.to_hdf( chopFilePath, mode='w', key=hdfKey )
-        except e :
-            print("ERROR: DataAnalyser: chop: failed writing to file:", chopFilePath, file=stderr )
+            if altIndex == 'index' :
+                writeFunc(df[xMin:xMax+1], chopFilePath, **kwargs)
+            else :
+                writeFunc( df[ (df[altIndex] >= xMin)and(df[altIndex] <= xMax) ]
+                        ,chopFilePath, **kwargs)
+        except Exception as e :
+            error("ERROR: DataAnalyser: chop: failed writing to file:"+chopFilePath)
             print(e)
-            return
 
-class DataNotLoaded(Exception) :
+class _DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
         Exception.__init__(self,*args,**kwargs)

@@ -18,6 +18,7 @@ them out for easier analysis.
 #TODO secondary views
 #TODO animation
 #TODO show summary statistics for view
+#TODO use pymagic to detect file types
 
 import matplotlib as mpl
 mpl.use("TkAgg")
@@ -27,19 +28,50 @@ from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import style
 style.use('ggplot')
+import os
+import pathlib
+from logging import *
+basicConfig(level=DEBUG)
+from warnings import warn as warnwarn
 
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
+import configer
+
 LARGE_FONT = ("Times", 12)
 NORM_FONT = ("Times", 10)
 
-filename = "No File Loaded"
 from DataAnalyser.DataAnalyser import DataAnalyser
 DA = DataAnalyser()
-config = {  'configDA'          : DA.getConfig()
-            ,'figMark'          : 'bo-'
+
+configDefault = {
+        'figMark'          : {
+            'default'   : 'bo-'
+            ,'func'     : lambda p: isinstance(p,str)
+            }
+        ,'writeFormat'      : {
+            'default'   : 'csv'
+            ,'func'     : lambda fmt: fmt in ['csv','hdf']
+            }
+        ,'xscale'       : {
+            'default'   : 1.0
+            ,'func'      : lambda x: isinstance(x,float)
+            }
+        ,'yscale'       : {
+            'default'   : 1.0
+            ,'func'      : lambda x: isinstance(x,float)
+            }
+        ,'chopOpts'     : {
+            'default'   : {
+                'fmt'       : 'csv'
+                ,'dirpath'  : pathlib.PurePath(os.path.curdir)
+                ,'hdfKey'   : 'chop'
+                ,'prefix'   : 'chop'
+                }
+            ,'func'      : lambda c: isinstance(c,dict)
+            }
         }
 
 class DataViewApp(tk.Tk):
@@ -50,12 +82,29 @@ class DataViewApp(tk.Tk):
     windowType = 'index'
 
     def __init__(self, *args, **kwargs):
-        
+        """Initialize DataViewApp
+
+        Position arguments:
+        All positional arguments are passed to Tk() constructor.  None are used
+        by DataAnalyser().
+
+        Keyword arguments:
+        All keyword arguments are passed to Tk() constructor. None are used by
+        DataAnalyser().
+        """
+
         tk.Tk.__init__(self, *args, **kwargs)
         ''' Build the application (main) window
         '''
         #tk.Tk.iconbitmap(self, default="clienticon.ico")
         tk.Tk.wm_title(self, "Data Viewer")
+
+        """ Load default configuration """
+        self.DVconfig = configer.Configer(configDefault)
+        self.testValue = 'hi there'
+        debug('self:'+str(type(self)))
+        debug('self.DVconfig.get(chop):'+str(self.DVconfig.get('chopOpts')))
+        debug('self.dict(DVconfig.get(chop)):'+str(dict(self.DVconfig.get('chopOpts'))))
         
         ''' Arrange "this" frame '''
         self.minsize(640,480)
@@ -78,7 +127,7 @@ class DataViewApp(tk.Tk):
         ''' Finish Menu bar '''
         tk.Tk.config(self,menu=menubar)
 
-        ''' Intialize Data Viewer '''
+        ''' Initialize Data Viewer '''
         self.DA = DA
 
         ''' Make a dictionary of different frame types (classes) that
@@ -117,8 +166,8 @@ class StartPage(tk.Frame):
 
 
 class PageThree(tk.Frame):
-
-    #TODO : organize default values
+    """Frame showing Data View and chop capabilities
+    """
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent) # call class parent
@@ -126,6 +175,8 @@ class PageThree(tk.Frame):
         ''' Initialize data members '''
         self.DA = DA
         self.isSafeToUpdate = False
+
+        self.DVconfig = controller.DVconfig
 
         ''' Create label for frame '''
         label = tk.Label(self, text="Data View", font=LARGE_FONT)
@@ -228,19 +279,19 @@ class PageThree(tk.Frame):
         self.dataWindowStartWidget.config(from_=minVal, to=maxSize-size)
         self.dataWindowStartWidget.set(start)
 
-    def load(self,*args,**kwargs) :
+    def load(self, *args, **kwargs) :
         ''' catch all load method
         Currently, the only implemented mode is CSV file data.
         '''
         self.isSafeToUpdate = False
-        self.loadFileData()
+        name = filedialog.askopenfilename()
+        self.loadFileData(path=name, *args, **kwargs)
 
-    def loadFileData(self) :
+    def loadFileData(self, *args, path=None, **kwargs) :
         ''' Show a dialog to select a file and load it.
         '''
-        name = filedialog.askopenfilename()
-        print("Got filename:" +name)
-        loadData(name)
+        print("Got filename:" +path)
+        loadData(path, *args, **kwargs)
         self.postLoad()
 
     def updateLabels(self) :
@@ -316,16 +367,20 @@ class PageThree(tk.Frame):
         self.fig.canvas.show()
 
     def doChop(self) :
-        self.DA.chop()
+        directory=pathlib.PurePath(os.path.curdir)
+        chopConf = self.DVconfig.get('chopOpts')
+        debug('chopConf:'+str(chopConf))
+        debug('dict(chopConf):'+str(dict(chopConf)))
+        self.DA.chop(dirpath=directory, **dict(chopConf))
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
         Exception.__init__(self,*args,**kwargs)
 
-def loadData(filename):
+def loadData(filename, *args, **kwargs):
     global DA
     #print("DEBUG: DataViewer: loadData: loading data")
-    DA.load_csv(filename)
+    DA.load(*args, filetype='csv', filename=filename, **kwargs)
 
 def popupmsg(msg):
     popup = tk.Tk()
