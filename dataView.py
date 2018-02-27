@@ -29,7 +29,7 @@ style.use('ggplot')
 import os
 import pathlib
 from logging import *
-basicConfig(level=DEBUG)
+basicConfig(level=ERROR)
 from warnings import warn as warnwarn
 
 import tkinter as tk
@@ -100,9 +100,6 @@ class DataViewApp(tk.Tk):
         """ Load default configuration """
         self.DVconfig = configer.Configer(configDefault)
         self.testValue = 'hi there'
-        debug('self:'+str(type(self)))
-        debug('self.DVconfig.get(chop):'+str(self.DVconfig.get('chopOpts')))
-        debug('self.dict(DVconfig.get(chop)):'+str(dict(self.DVconfig.get('chopOpts'))))
         
         ''' Arrange "this" frame '''
         self.minsize(640,480)

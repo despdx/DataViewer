@@ -20,7 +20,7 @@ import os
 from sys import stderr
 import pathlib
 from logging import *
-basicConfig(level=WARNING)
+basicConfig(level=ERROR)
 from warnings import warn as warnwarn
 import configer
 
@@ -302,5 +302,10 @@ class DataAnalyser(object):
             print(e)
 
 class _DataNotLoaded(Exception) :
+    """ Specialized error class for DataAnalyser
+
+    This error is only raised when DA is asked to perform a function that requires
+    an active data set but one has not yet been loaded.
+    """
     def __init__(self,*args,**kwargs) :
         Exception.__init__(self,*args,**kwargs)
