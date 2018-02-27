@@ -8,7 +8,8 @@ Data Analyser Helper
 #TODO scaling (unit conversion)
 #TODO interpret data types, allow filtering
 #TODO linear fit, view
-#TODO polymorphic load
+#TODO Fix doc strings
+#TODO WIP: polymorphic load
 #TODO multi-key HDF5 instead of many files
 #TODO quadratic fit, view
 #TODO Summary statistics

@@ -5,7 +5,6 @@ them out for easier analysis.
 '''
 #TODO Alternate indexes
 #TODO fix doc strings
-#TODO fix NotImplementedError class
 #TODO disable chop button until loaded
 #TODO start on start frame, show PageThree after load
 #TODO speed up update (without animation)
@@ -17,6 +16,7 @@ them out for easier analysis.
 #TODO animation
 #TODO show summary statistics for view
 #TODO use pymagic to detect file types
+#TODO ? fix NotImplementedError class
 
 import matplotlib as mpl
 mpl.use("TkAgg")
