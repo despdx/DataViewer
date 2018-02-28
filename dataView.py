@@ -212,6 +212,8 @@ class PageThree(tk.Frame):
 
     def addDataView(self) :
         ''' Data View X Widget '''
+        self.xViewSelLabel = tk.Label(self, text='Abscissa')
+        self.xViewSelLabel.pack()
         self.xViewSel = tk.StringVar(self)
         self.xViewSel.set("No data") # default value
         self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, "No Data" )
@@ -220,6 +222,8 @@ class PageThree(tk.Frame):
         self.xViewSel.trace('w', self.viewChangeTrace) # set up event
         self.addDeactivateList(self.dataViewXwidget)
         ''' Data View Y Widget '''
+        self.yViewSelLabel = tk.Label(self, text='Ordinate')
+        self.yViewSelLabel.pack()
         self.yViewSel = tk.StringVar(self)
         self.yViewSel.set("No data") # default value
         self.dataViewYwidget = tk.OptionMenu(self, self.yViewSel, "No Data" )
@@ -238,12 +242,16 @@ class PageThree(tk.Frame):
 
     def addDataWindow(self) :
         ''' Data Window Size Widget '''
+        self.dataWindowSizeWidgetLabel = tk.Label(self, text='View Size')
+        self.dataWindowSizeWidgetLabel.pack()
         self.dataWindowSizeWidget = tk.Scale(self, from_=1, to=10, resolution=1,
                 orient="horizontal")
         self.dataWindowSizeWidget.bind("<ButtonRelease-1>", self.updateEvent)
         self.dataWindowSizeWidget.bind("<Button1-Motion>", self.updateEvent)
         self.dataWindowSizeWidget.pack(fill=tk.X,expand=1)
         ''' Data Window Start Widget '''
+        self.dataWindowStartWidgetLabel = tk.Label(self, text='View Start')
+        self.dataWindowStartWidgetLabel.pack()
         self.dataWindowStartWidget = tk.Scale(self, from_=0, to=10, resolution=1,
                 orient="horizontal")
         self.dataWindowStartWidget.bind("<ButtonRelease-1>", self.updateEvent)
