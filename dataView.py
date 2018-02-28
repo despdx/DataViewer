@@ -5,15 +5,17 @@ them out for easier analysis.
 '''
 #TODO Alternate indexes
 #TODO fix doc strings
-#TODO disable chop button until loaded
-#TODO start on start frame, show PageThree after load
+#TODO label graph
 #TODO speed up update (without animation)
-#TODO label GUI items
 #TODO scale scales
 #TODO filter data types
 #TODO pick window from figure
+#TODO disable chop button until loaded
+#TODO Alternate indexes
 #TODO secondary views
 #TODO animation
+#TODO start on start frame, show PageThree after load
+#TODO better window and view widget layouts
 #TODO show summary statistics for view
 #TODO use pymagic to detect file types
 #TODO ? fix NotImplementedError class
@@ -266,8 +268,10 @@ class PageThree(tk.Frame):
         self.fig.canvas.show()
 
         self.canvas = FigureCanvasTkAgg(self.fig, self)
+        """ Set up callback from canvas draw events, i.e. pan/zoom """
+        self.cid1 = self.fig.canvas.mpl_connect('draw_event', self.updateFromCavas)
+        #self.cid1 = self.fig.canvas.mpl_connect('button_release_event', self.updateFromCavas)
         #TODO animation
-        #self.canvas.mpl_connect('
         self.canvas.show()
         self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
@@ -347,6 +351,14 @@ class PageThree(tk.Frame):
             self.altIdxSelW['menu'].add_command( label=label, command=tk._setit(self.altIdxSel,label) )
         ''' re-enable widgets '''
         self.activateWidgets()
+
+    def updateFromCavas(self, event) :
+        """ Called when view is changed using figure canvas area. """
+        """ Get the figure axis limits """
+        figMinX, figMaxX = self.ax.get_xlim()
+        debug('Got interval from MPL axis:'+str((figMinX,figMaxX)))
+        """ Set the current window to match """
+        #TODO
 
     def viewChangeTrace(self, *args):
         #print("DEBUG: viewChange: isSafeToUpdate", self.isSafeToUpdate)
