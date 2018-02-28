@@ -289,7 +289,7 @@ class DataAnalyser(object):
         if fmt not in self.__writeTypes.keys() :
             raise TypeError('Unsupported data format: '+str(fmt))
         writeFunc = self.__writeTypes[fmt]
-        debug("DataAnalyser: chop: writing to file:"+chopFilePath)
+        info("DataAnalyser: chop: writing to file:"+chopFilePath)
         df = self.df
         altIndex = self.altIndexCol
         try :
