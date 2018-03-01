@@ -363,6 +363,8 @@ class PageThree(tk.Frame):
         #print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
         self.ax.clear()
         self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
+        self.ax.set_xlabel(xSel)
+        self.ax.set_ylabel(ySel)
         self.fig.canvas.show()
 
     def doChop(self) :
