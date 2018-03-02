@@ -173,6 +173,7 @@ class PageThree(tk.Frame):
         ''' Initialize data members '''
         self.DA = DA
         self.isSafeToUpdate = False
+        self.deactList = list()
 
         self.DVconfig = controller.DVconfig
 
@@ -194,9 +195,15 @@ class PageThree(tk.Frame):
         self.addDataView()      # Add widgets for setting data view
         self.addChop()          # Add chop button
 
+    def addDeactivateList(self, listLike) :
+        """ Keep a list of deactivate-able widgets """
+        if isinstance(listLike, list) or isinstance(listLike, tuple) :
+            for item in listLike :
+                self.deactList.append(item)
+        else :
+            self.deactList.append(listLike)
+
     def addDataView(self) :
-        ''' Data View Index  '''
-        #TODO 
         ''' Data View X Widget '''
         self.xViewSel = tk.StringVar(self)
         self.xViewSel.set("No data") # default value
@@ -204,6 +211,7 @@ class PageThree(tk.Frame):
         self.dataViewXwidget.configure(state="disabled")
         self.dataViewXwidget.pack()
         self.xViewSel.trace('w', self.viewChangeTrace) # set up event
+        self.addDeactivateList(self.dataViewXwidget)
         ''' Data View Y Widget '''
         self.yViewSel = tk.StringVar(self)
         self.yViewSel.set("No data") # default value
@@ -211,6 +219,15 @@ class PageThree(tk.Frame):
         self.dataViewYwidget.configure(state="disabled")
         self.dataViewYwidget.pack()
         self.yViewSel.trace('w', self.viewChangeTrace) # set up event
+        self.addDeactivateList(self.dataViewYwidget)
+        """ Data View Index Selection """
+        self.altIdxSel = tk.StringVar(self)
+        self.altIdxSel.set("No data") # default value
+        self.altIdxSelW = tk.OptionMenu(self, self.altIdxSel, "No Data" )
+        self.altIdxSelW.configure(state="disabled")
+        self.altIdxSelW.pack()
+        self.altIdxSel.trace('w', self.viewChangeTrace) # set up event
+        self.addDeactivateList(self.altIdxSelW)
 
     def addDataWindow(self) :
         ''' Data Window Size Widget '''
