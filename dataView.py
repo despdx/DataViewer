@@ -203,6 +203,16 @@ class PageThree(tk.Frame):
         else :
             self.deactList.append(listLike)
 
+    def deactivateWidgets(self) :
+        for widget in self.deactList :
+            widget.configure(state='disabled')
+
+    def activateWidgets(self) :
+        if not self.DA.isLoaded :
+            return DataNotLoaded()
+        for widget in self.deactList :
+            widget.configure(state='normal')
+
     def addDataView(self) :
         ''' Data View X Widget '''
         self.xViewSel = tk.StringVar(self)
@@ -329,8 +339,7 @@ class PageThree(tk.Frame):
             #self.dataViewXwidget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) ) # wrong!
             #self.dataViewYwidget['menu'].add_command( label=label, command=lambda : self.yViewSel.set(label) ) # wrong!
         ''' re-enable widgets '''
-        self.dataViewXwidget.configure(state="normal") # enable widget
-        self.dataViewYwidget.configure(state="normal") # enable widget
+        self.activateWidgets()
 
     def viewChangeTrace(self, *args):
         #print("DEBUG: viewChange: isSafeToUpdate", self.isSafeToUpdate)
