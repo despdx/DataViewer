@@ -3,6 +3,7 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
+#TODO Alternate indexes
 #TODO fix doc strings
 #TODO fix NotImplementedError class
 #TODO disable chop button until loaded
