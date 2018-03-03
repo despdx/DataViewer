@@ -360,6 +360,11 @@ class PageThree(tk.Frame):
         self.yViewSel.set(view[1])
         # TODO Set active value in pulldown
 
+    def setAltIndex(self, newIdx):
+        """ Set the GUI presentation of alt index """
+        self.isSafeToUpdate = False
+        self.altIdxSel.set(newIdx)
+
     def updateEvent(self, event):
         ''' Change/Update data view when user requests a change.
         Call this whenever the user makes a change to view values.
