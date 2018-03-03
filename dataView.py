@@ -13,7 +13,6 @@ them out for easier analysis.
 #TODO scale scales
 #TODO filter data types
 #TODO pick window from figure
-#TODO Alternate indexes
 #TODO secondary views
 #TODO animation
 #TODO show summary statistics for view
