@@ -281,6 +281,7 @@ class PageThree(tk.Frame):
         self.updateLabels() # get new data types from data loaded
         view = self.DA.getView() # retrieve the default view after load
         self.setView(view) # configure GUI to reflect new data
+        self.setAltIndex('index')
         self.isSafeToUpdate = True
         #print("DEBUG: postLoad: isSafeToUpdate", self.isSafeToUpdate)
         ''' now, set the window '''
@@ -331,13 +332,14 @@ class PageThree(tk.Frame):
         ''' Delete old options from menu '''
         self.dataViewXwidget['menu'].delete(0, tk.END)
         self.dataViewYwidget['menu'].delete(0, tk.END)
+        self.altIdxSelW['menu'].delete(0, tk.END)
+        self.altIdxSelW['menu'].add_command( label='index', command=tk._setit(self.altIdxSel,'index') )
         ''' Relabel the drop down menus'''
         for label in newLabels :
-            #print("DEBUG: adding label to option menu:",label)
+            debug("Adding label to option menu:"+str(label))
             self.dataViewXwidget['menu'].add_command( label=label, command=tk._setit(self.xViewSel,label) )
             self.dataViewYwidget['menu'].add_command( label=label, command=tk._setit(self.yViewSel,label) )
-            #self.dataViewXwidget['menu'].add_command( label=label, command=lambda : self.xViewSel.set(label) ) # wrong!
-            #self.dataViewYwidget['menu'].add_command( label=label, command=lambda : self.yViewSel.set(label) ) # wrong!
+            self.altIdxSelW['menu'].add_command( label=label, command=tk._setit(self.altIdxSel,label) )
         ''' re-enable widgets '''
         self.activateWidgets()
 
@@ -366,25 +368,37 @@ class PageThree(tk.Frame):
         self.altIdxSel.set(newIdx)
 
     def updateEvent(self, event):
-        ''' Change/Update data view when user requests a change.
+        """ Change/Update data view when user requests a change.
         Call this whenever the user makes a change to view values.
-        '''
+        """
         if not self.DA.isLoaded :
             return DataNotLoaded()
         DA = self.DA
+
+        """ Set Window """
         newWinSize = self.dataWindowSizeWidget.get()
         newWinStart = self.dataWindowStartWidget.get()
         limitDict=self.DA.getIndexLimits()
-        #print("DEBUG: updateEvent: got limits: "+str(limitDict))
+        debug("DEBUG: updateEvent: got limits: "+str(limitDict))
         maxSize, minVal = ( limitDict['max'] , limitDict['min'] )
         self.setWindow( minVal=minVal, start=newWinStart,
                         maxSize=maxSize, size=newWinSize )
 
-        ''' set view '''
+        """ set view """
         xSel = self.xViewSel.get()
         ySel = self.yViewSel.get()
         newView = [ xSel,ySel ]
-        #print("DEBUG: updateEvent: newView: "+str(newView))
+        debug("updateEvent: newView: "+str(newView))
+
+        """ set index """
+        try :
+            DA.setAltIndexColumn(self.altIdxSel.get())
+        except Exception as e:
+            warn('updateEvent: Failed to set altnernate index, ignoring selection')
+            print(e)
+        else :
+            """ just leave it set to index """
+            pass
 
         DA.setView( view=newView, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
