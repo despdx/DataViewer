@@ -177,10 +177,17 @@ class DataAnalyser(object):
         return retVal
 
     def setAltIndexColumn(self, value):
+        debug('setAltIndexColumn: got new index name:'+str(value))
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: setAltIndexColumn: no data loaded")
-        if value not in self.df.columns :
-            raise Exception('Invalid Column Name')
+        """ Check for special option, index """
+        if value is 'index' :
+            self.altIndexCol = 'index'
+            return
+        """ Otherwise, check value. """
+        if not self.isValidColumn(value):
+            raise Exception('Invalid column name:'+str(value))
+
         self.altIndexCol = value
 
     def setView(self, view=None, windowStart = None, windowSize=None, windowType=None) :
@@ -190,7 +197,7 @@ class DataAnalyser(object):
         if view is not None :
             for item in view :
                 if item not in goodLabels :
-                    raise TypeError("ERROR: '"+item+"' not a valid label")
+                    raise TypeError("ERROR: '"+str(item)+"' not a valid label")
             self.currentView = view
         if windowStart is not None :
             self.windowStart = windowStart
