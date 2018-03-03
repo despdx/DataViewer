@@ -156,6 +156,26 @@ class DataAnalyser(object):
             raise _DataNotLoaded("ERROR: DataAnalyser: getLabels: no data loaded")
         return self.df.columns
 
+    def isValidColumn(self, name):
+        return name in self.df.columns
+
+    def isIndexable(self, name):
+        """ Determine whether or not the given column can be used as an index. """
+        retVal = False
+        if isValidColumn(name):
+            series = self.df[name]
+            """ is it numeric ? """
+            try :
+                series.min()
+            except Exception as e:
+                warnwarn('Column is not usable as an index:'+str(name))
+            """ Are all values unique? """
+            if series.duplicated().any():
+                """ Are the values ordered? """
+                #TODO sort it?
+                retVal = True
+        return retVal
+
     def setAltIndexColumn(self, value):
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: setAltIndexColumn: no data loaded")
