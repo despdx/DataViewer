@@ -178,11 +178,13 @@ class DataAnalyser(object):
         return retVal
 
     def setAltIndexColumn(self, value):
-        debug('setAltIndexColumn: got new index name:'+str(value))
+        warn('DataAnalyser:setAltIndexColumn: Not implemented.')
+        return
+        debug("setAltIndexColumn: got new index name:'"+str(value)+"'")
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: setAltIndexColumn: no data loaded")
         """ Check for special option, index """
-        if value is 'index' :
+        if str(value) == str('index') :
             self.altIndexCol = 'index'
             return
         """ Otherwise, check value. """
@@ -292,12 +294,13 @@ class DataAnalyser(object):
         info("DataAnalyser: chop: writing to file:"+chopFilePath)
         df = self.df
         altIndex = self.altIndexCol
+        #TODO finish alternative indexes
         try :
             if altIndex == 'index' :
                 writeFunc(df[xMin:xMax+1], chopFilePath, **kwargs)
             else :
-                writeFunc( df[ (df[altIndex] >= xMin)and(df[altIndex] <= xMax) ]
-                        ,chopFilePath, **kwargs)
+                dfView = df[ (df[altIndex] >= xMin) & (df[altIndex] <= xMax) ]
+                writeFunc( dfView ,chopFilePath, **kwargs)
         except Exception as e :
             error("ERROR: DataAnalyser: chop: failed writing to file:"+chopFilePath)
             print(e)

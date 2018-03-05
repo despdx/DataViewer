@@ -409,7 +409,9 @@ class PageThree(tk.Frame):
 
         """ set index """
         try :
-            DA.setAltIndexColumn(self.altIdxSel.get())
+            pass
+            #DA.setAltIndexColumn(self.altIdxSel.get())
+            #TODO
         except Exception as e:
             warn('updateEvent: Failed to set altnernate index, ignoring selection')
             print(e)
