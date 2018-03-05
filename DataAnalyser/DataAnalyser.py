@@ -4,15 +4,15 @@ Data Analyser Helper
 
 '''
 #(done?)TODO cross-platform files
-#TODO remove configuration
+#TODO linear fit, view
+#TODO Summary statistics
 #TODO scaling (unit conversion)
 #TODO interpret data types, allow filtering
-#TODO linear fit, view
 #TODO Fix doc strings
 #TODO WIP: polymorphic load
 #TODO multi-key HDF5 instead of many files
 #TODO quadratic fit, view
-#TODO Summary statistics
+#TODO WIP remove configuration
 #TODO ML fits
 
 import pandas as pd

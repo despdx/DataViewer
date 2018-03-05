@@ -3,20 +3,20 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
-#TODO Alternate indexes
+#TODO show summary statistics for view
+#TODO linear fit
+#TODO stats
 #TODO fix doc strings
-#TODO label graph
 #TODO speed up update (without animation)
-#TODO scale scales
 #TODO filter data types
 #TODO pick window from figure
 #TODO disable chop button until loaded
-#TODO Alternate indexes
 #TODO secondary views
+#TODO scale scales
+#TODO WIP Alternate indexes, need to be able to change scales first
 #TODO animation
 #TODO start on start frame, show PageThree after load
 #TODO better window and view widget layouts
-#TODO show summary statistics for view
 #TODO use pymagic to detect file types
 #TODO ? fix NotImplementedError class
 
