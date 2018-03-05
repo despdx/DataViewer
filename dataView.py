@@ -460,6 +460,7 @@ def quitHandler():
     #TODO Call root window.quit()
     quit()
 
-app = DataViewApp()
-app.protocol("WM_DELETE_WINDOW", quitHandler)
-app.mainloop()
+if __name__ == "__main__" :
+    app = DataViewApp()
+    app.protocol("WM_DELETE_WINDOW", quitHandler)
+    app.mainloop()
