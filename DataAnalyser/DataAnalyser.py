@@ -3,7 +3,6 @@
 Data Analyser Helper
 
 '''
-#(done?)TODO cross-platform files
 #TODO linear fit, view
 #TODO Summary statistics
 #TODO scaling (unit conversion)
@@ -286,7 +285,7 @@ class DataAnalyser(object):
         if not self.isLoaded :
             raise _DataNotLoaded("Data not loaded.")
         xMin, xMax = (self.windowStart, self.windowStart + self.windowSize)
-        filename = "{0}_{1:d}:{2:d}.{3}".format(prefix,xMin,xMax,fmt)
+        filename = "{0}_{1:d}-{2:d}.{3}".format(prefix,xMin,xMax,fmt)
         chopFilePath = os.path.join( dirpath , filename )
         if fmt not in self.__writeTypes.keys() :
             raise TypeError('Unsupported data format: '+str(fmt))
