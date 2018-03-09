@@ -269,7 +269,7 @@ class PageThree(tk.Frame):
 
         self.canvas = FigureCanvasTkAgg(self.fig, self)
         """ Set up callback from canvas draw events, i.e. pan/zoom """
-        self.cid1 = self.fig.canvas.mpl_connect('draw_event', self.updateFromCavas)
+        #self.cid1 = self.fig.canvas.mpl_connect('draw_event', self.updateFromCavas)
         #self.cid1 = self.fig.canvas.mpl_connect('button_release_event', self.updateFromCavas)
         #TODO animation
         self.canvas.show()
