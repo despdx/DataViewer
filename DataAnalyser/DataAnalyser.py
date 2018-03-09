@@ -25,7 +25,7 @@ from warnings import warn as warnwarn
 import configer
 
 def _loadCSV(filename, *args, **kwargs) :
-    return pd.DataFrame.from_csv(filename, *args, **kwargs)
+    return pd.read_csv(filename, *args, **kwargs)
 
 def _loadHDF(filename, *args, **kwargs) :
     warnwarn('HDF loading not yet implemented.')
