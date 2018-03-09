@@ -306,6 +306,11 @@ class DataAnalyser(object):
             error("ERROR: DataAnalyser: chop: failed writing to file:"+chopFilePath)
             print(e)
 
+    def getStats(self):
+        df = self.getViewData()
+        summaryStats = df.describe()
+        return summaryStats
+
 class _DataNotLoaded(Exception) :
     """ Specialized error class for DataAnalyser
 

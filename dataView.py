@@ -422,13 +422,21 @@ class PageThree(tk.Frame):
         DA.setView( view=newView, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
 
-        df = DA.getViewData()
+        df = self.DA.getViewData()
         #print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
         self.ax.clear()
         self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
         self.ax.set_xlabel(xSel)
         self.ax.set_ylabel(ySel)
         self.fig.canvas.show()
+
+        """ Show Statistics """
+        self.showStats()
+
+    def showStats(self):
+        """ Get and report statsistics for the current view """
+        statString = self.DA.getStats()
+        print(statString)
 
     def doChop(self) :
         directory=pathlib.PurePath(os.path.curdir)
