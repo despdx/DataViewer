@@ -137,9 +137,11 @@ class DataAnalyser(object):
         ''' Load the file '''
         loadFunc = DataAnalyser.__readTypes[filetype]
         self.df = loadFunc(filename, *args, **kwargs)
+        debug("load:Loaded new data file: head:"+str(self.df.head()))
         self.isLoaded = True
         self.cleanData()
         self.__setDefaultView()
+        debug("load:default view:"+str(self.currentView))
 
     def cleanData(self) :
         #data.dropna(inplace=True)
