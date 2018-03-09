@@ -444,7 +444,11 @@ class DataNotLoaded(Exception) :
 def loadData(filename, *args, **kwargs):
     global DA
     #print("DEBUG: DataViewer: loadData: loading data")
-    DA.load(*args, filetype='csv', filename=filename, **kwargs)
+    kwargs['index_col'] = False #force DA to always generate it's own index
+    DA.load(*args
+            ,filetype='csv' # force CSV for now
+            ,filename=filename
+            , **kwargs)
 
 def popupmsg(msg):
     popup = tk.Tk()
