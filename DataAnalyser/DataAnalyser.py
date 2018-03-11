@@ -4,7 +4,6 @@ Data Analyser Helper
 
 '''
 #TODO linear fit, view
-#TODO Summary statistics
 #TODO scaling (unit conversion)
 #TODO interpret data types, allow filtering
 #TODO Fix doc strings
@@ -13,6 +12,7 @@ Data Analyser Helper
 #TODO quadratic fit, view
 #TODO WIP remove configuration
 #TODO ML fits
+#TODO GUI summary statistics
 
 import pandas as pd
 import numpy as np

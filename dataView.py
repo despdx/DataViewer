@@ -3,9 +3,8 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
-#TODO show summary statistics for view
+#TODO show more than one relation
 #TODO linear fit
-#TODO stats
 #TODO fix doc strings
 #TODO speed up update (without animation)
 #TODO filter data types
@@ -19,6 +18,7 @@ them out for easier analysis.
 #TODO better window and view widget layouts
 #TODO use pymagic to detect file types
 #TODO ? fix NotImplementedError class
+#TODO show summary statistics for view in GUI
 
 import matplotlib as mpl
 mpl.use("TkAgg")
