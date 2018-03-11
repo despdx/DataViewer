@@ -116,19 +116,33 @@ class DataAnalyser(object):
         self.windowSize = self.df.shape[0]
         self.windowType = 'index'
         self.altIndexCol = 'index'
-        ''' Create a default view of the fist column only.  One column is
-        technically okay, but, rest of implementation may assume otherwise.
-        '''
-        columns = self.df.columns
-        self.currentView = columns[0:1].tolist()
-        if columns.size > 1 :
-            self.currentView = columns[0:2].tolist()
+        """ Create a default view of the fist column only.  One column is
+        technically okay, but, rest of implementation may assume otherwise."""
+        columns = self.df.columns.tolist()
+        if isinstance(self.indexCol, int) :
+            """ Caller specified a particular column for index, use it for the
+            default abscissa and the next one as the default ordinate. """
+            self.currentView = [ (columns[self.indexCol],columns[self.indexCol+1]) ]
+        elif isinstance(self.indexCol, bool):
+            if False == self.indexCol :
+                """ Assume first and second columns are reasonable choices """
+                self.currentView = [ (columns[0],columns[0]) ]
+                if columns.size > 1 :
+                    self.currentView = [ columns[0:2].tolist() ]
+            else : 
+                raise TypeError("Cannot interpret index column == True")
+        else :
+            raise TypeError('Cannot interpret index column type specification:'
+                +str(self.indexCol)
+                +', which is of type:'+str(type(self.indexCol))
+                )
 
     def getConfig(self) :
         return self.__config.getConfig()
 
     def load(self, *args, filetype='csv', filename=None, **kwargs):
-        ''' Determine which file to load '''
+        """ Determine which file to load """
+        self.indexCol = kwargs['index_col']
         if filename == None :
             raise Exception('No filename provided.')
         else :
@@ -226,20 +240,21 @@ class DataAnalyser(object):
     def getViewLimits(self) :
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: getWindowLimits: no data loaded")
-        x,y = self.view
-        return {    'xmin' : self.df[x].min(),
-                    'ymin' : self.df[y].min(),
-                    'xmax' : self.df[x].max(),
-                    'ymax' : self.df[y].max() }
+        viewLimitDictList = list()
+        for view in self.view :
+            x,y = self.view
+            viewDict = {'xmin' : self.df[x].min(),
+                        'ymin' : self.df[y].min(),
+                        'xmax' : self.df[x].max(),
+                        'ymax' : self.df[y].max() }
+            viewLimitDictList.append(viewDict)
+        return viewLimitDictList
 
     def setWindow(self, start, size) :
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: setWindow: no data loaded")
         self.windowStart = start
         self.windowSize = size
-
-    def getWindow(self) :
-        return (self.windowStart, self.windowSize)
 
     def getWindow(self) :
         if not self.isLoaded :
@@ -253,34 +268,20 @@ class DataAnalyser(object):
             start = self.windowStart
             end = self.windowStart + self.windowSize
             mySlice = slice(start,end)
-            df = self.df[mySlice]
-            #debug("currentView:"+ str(self.currentView))
-            df = df[ self.currentView ]
-            return df
+            dfList = list()
+            debug("currentView:"+ str(self.currentView))
+            for viewpair in self.currentView :
+                df = self.df[mySlice]           # get slice of the data requested
+                df = df[ self.currentView ]     # get view
+                dfList.append(df)
+            return dfList
         else:
             raise Exception('DataAnalyser window type ' + self.windowType + ' not implemented')
 
     def get2DData(self) :
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: get2DData: no data loaded")
-        return (self.df[self.altIndexCol].values,
-                self.df[self.currentView[0].values],
-                self.df[self.currentView[1].values]
-                )
-
-    def getAxes(self) :
-        if not self.isLoaded :
-            raise _DataNotLoaded("ERROR: DataAnalyser: no data loaded")
-        xColName = self.currentView[0]
-        yColName = self.currentView[1]
-        axMain = data.plot(x=xColName,y=yColName)
-        axTwo = None
-        axThree = None
-        if isinstance(self.currentView, list) :
-            axTwo = data[labelTwo].plot(x=self.altIndexCol, y=labelTwo)
-            if len(self.currentView) > 1 :
-                axThree = data[labelThree].plot(x=self.altIndexCol, y=labelThree)
-        return (axMain, axTwo, axThree)
+        raise Exception('Not implemented yet.')
 
     def chop(self, dirpath=pathlib.PurePath(os.path.curdir), fmt='csv'
             ,hdfKey='chop', prefix='chop', **kwargs) :
@@ -307,9 +308,11 @@ class DataAnalyser(object):
             print(e)
 
     def getStats(self):
-        df = self.getViewData()
-        summaryStats = df.describe()
-        return summaryStats
+        dfList = self.getViewData()
+        statList = list()
+        for df in dfList :
+            statList.append( df.describe() )
+        return returnStatList
 
 class _DataNotLoaded(Exception) :
     """ Specialized error class for DataAnalyser
