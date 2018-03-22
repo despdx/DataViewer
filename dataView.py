@@ -161,17 +161,116 @@ class StartPage(tk.Frame):
                             command=lambda: controller.show_frame(PageThree))
         button3.pack()
 
+class labelSelWidgetFrame(tk.Frame):
+    """Frame a labelled selector widget."""
+
+    def __init__(self, parent, label='selector'):
+        tk.Frame.__init__(self, parent)
+        self.labelW = tk.Label(self, text=label, font=NORM_FONT)
+        self.labelW.pack(side=tk.LEFT)
+        self.tkStrVar = tk.StringVar(self)
+        self.tkSelW = tk.OptionMenu(self, self.tkStrVar, "No Data")
+        self.disable()
+        self.tkSelW.pack(side=tk.LEFT)
+
+    def getSelWidet(self):
+        return self.tkSelW
+
+    def getVariable(self):
+        return self.tkStrVar
+
+    def getSelValue(self):
+        return self.tkStrVar.get()
+
+    def setSelValue(self, value):
+        return self.tkStrVar.set(value)
+
+    def setEventHandler(self, func):
+        """ Set a new event handler on the menu """
+        """ Remove old obserers """
+        obsList = self.tkStrVar.trace_info()            # get list of observers
+        debug("Got list of traces:"+str(obsList))       #
+        for pair in obsList :                           # each pair of observer identifiers
+            self.tkStrVar.remove(pair)                  # remove this observer
+        """ Set new observer """
+        self.tkStrVar.trace('w', func)
+
+    def setOptionList(self, strList):
+        self.tkselW['menu'].delete(0,tk.END)
+        for name in strList:
+            debug("Adding name to option menu:"+str(name))
+            self.tkSelW['menu'].add_command( label=name, command=tk._setit(self.tkStrVar,name) )
+        self.enable()
+
+    def enable(self):
+        self.tkSelW.configure(state='normal')
+
+    def disable(self):
+        self.tkSelW.configure(state='disable')
+
+    def configure(self, *args, **kwargs):
+        if 'state' in kwargs.keys():
+            self.tkSelW.configure(state=kwargs['state'])
+
+class viewWidgetGroupFrame(tk.Frame):
+    """Frame showing the data view widgets."""
+
+    def __init__(self, parent, label="Enable"):
+        tk.Frame.__init__(self, parent)
+        """ A check button for on/off of this view """
+        self.var = tk.IntVar()
+        self.checkButton = tk.Checkbutton(self, text=label, variable=self.var)
+        self.checkButton.pack()
+        self.var.trace('w', self._checkChangeHandler)
+        self.xViewSelFrame = labelSelWidgetFrame(self, label='Abscissa')
+        self.xViewSelFrame.pack()
+        self.yViewSelFrame = labelSelWidgetFrame(self, label='Ordinate')
+        self.yViewSelFrame.pack()
+
+    def enable(self):
+        self.xViewSelFrame.enable()
+        self.yViewSelFrame.enable()
+
+    def disable(self):
+        self.xViewSelFrame.disable()
+        self.yViewSelFrame.disable()
+
+    def setEventHandler(self, func):
+        self.xViewSelFrame.setEventHandler(func)
+        self.yViewSelFrame.setEventHandler(func) 
+
+    def setView(self, view):
+        self.xViewSelFrame.setSelValue(view[0])
+        self.yViewSelFrame.setSelValue(view[1])
+
+    def getView(self):
+        xSel = self.xViewSelFrame.getSelValue()
+        ySel = self.yViewSelFrame.getSelValue()
+        return list(xSel,ySel)
+
+    def _checkChangeHandler(self, event):
+        if 1 == self.var.get():
+            """ Check box was enabled. """
+            debug("Check button was enabled.")
+            self.enable()
+        elif 0 == self.var.get():
+            """ Check box was disabled. """
+            debug("Check button was disabled.")
+            self.disable()
+        else :
+            raise TypeError("Cannot interpret check button value"+str(self.var.get()))
 
 class PageThree(tk.Frame):
     """Frame showing Data View and chop capabilities
     """
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, **kwargs):
         tk.Frame.__init__(self, parent) # call class parent
 
         ''' Initialize data members '''
         self.DA = DA
         self.isSafeToUpdate = False
+        self.numViews = 2
         self.deactList = list()
 
         self.DVconfig = controller.DVconfig
@@ -213,27 +312,22 @@ class PageThree(tk.Frame):
             widget.configure(state='normal')
 
     def addDataView(self) :
-        ''' Data View X Widget '''
-        self.xViewSelLabel = tk.Label(self, text='Abscissa')
-        self.xViewSelLabel.pack()
-        self.xViewSel = tk.StringVar(self)
-        self.xViewSel.set("No data") # default value
-        self.dataViewXwidget = tk.OptionMenu(self, self.xViewSel, "No Data" )
-        self.dataViewXwidget.configure(state="disabled")
-        self.dataViewXwidget.pack()
-        self.xViewSel.trace('w', self.viewChangeTrace) # set up event
-        self.addDeactivateList(self.dataViewXwidget)
-        ''' Data View Y Widget '''
-        self.yViewSelLabel = tk.Label(self, text='Ordinate')
-        self.yViewSelLabel.pack()
-        self.yViewSel = tk.StringVar(self)
-        self.yViewSel.set("No data") # default value
-        self.dataViewYwidget = tk.OptionMenu(self, self.yViewSel, "No Data" )
-        self.dataViewYwidget.configure(state="disabled")
-        self.dataViewYwidget.pack()
-        self.yViewSel.trace('w', self.viewChangeTrace) # set up event
-        self.addDeactivateList(self.dataViewYwidget)
+        """ Add widgets that control the view """
+        #self.viewList = list(('No Data','No Data'),('No Data','No Data'))
+        self.viewList = list(('No Data','No Data'))
+        self.dataViewWidgetDict = dict()
+
+        """ Add View Widget Sub-Frames """
+        self.dataViewSubFrameList = list()              # list of "subframes"
+        for frameNum in range(0,self.numViews) :
+            subFrame = viewWidgetGroupFrame(self, label="Data View "+str(frameNum))
+            subFrame.setEventHandler(self.viewChangeTrace)
+            subFrame.pack()
+            self.dataViewSubFrameList.append(subFrame)
+        self.dataViewSubFrameList[0].enable()
+
         """ Data View Index Selection """
+        """
         self.altIdxSel = tk.StringVar(self)
         self.altIdxSel.set("No data") # default value
         self.altIdxSelW = tk.OptionMenu(self, self.altIdxSel, "No Data" )
@@ -241,6 +335,7 @@ class PageThree(tk.Frame):
         self.altIdxSelW.pack()
         self.altIdxSel.trace('w', self.viewChangeTrace) # set up event
         self.addDeactivateList(self.altIdxSelW)
+        """
 
     def addDataWindow(self) :
         ''' Data Window Size Widget '''
@@ -288,8 +383,8 @@ class PageThree(tk.Frame):
         ''' Things to run after loading a new DataAnalyser object.
         '''
         self.updateLabels() # get new data types from data loaded
-        view = self.DA.getView() # retrieve the default view after load
-        self.setView(view) # configure GUI to reflect new data
+        viewList = self.DA.getView() # retrieve the default view after load
+        self.setView(viewList) # configure GUI to reflect new data
         self.setAltIndex('index')
         self.isSafeToUpdate = True
         #print("DEBUG: postLoad: isSafeToUpdate", self.isSafeToUpdate)
@@ -369,15 +464,15 @@ class PageThree(tk.Frame):
         #print("DEBUG: viewChangeTrace: new selection:",str((newx,newy)) )
         self.updateEvent(None)
 
-    def setView(self, view) :
-        ''' Set the GUI representation of the current data view
+    def setView(self, viewList) :
+        """ Set the GUI representation of the current data view
         Takes a "view" object and sets the GUI so that it matches.
-        '''
+        """
         self.isSafeToUpdate = False
-        #print("DEBUG: DataViewApp: setView: "+str(view))
-        self.xViewSel.set(view[0])
-        self.yViewSel.set(view[1])
-        # TODO Set active value in pulldown
+        for view,subFrame in zip(viewList,self.dataViewSubFrameList) :
+            print("DEBUG: DataViewApp: setView: "+str(view))
+            subFrame.setView(view)
+            # TODO Set active value in pulldown
 
     def setAltIndex(self, newIdx):
         """ Set the GUI presentation of alt index """
@@ -392,7 +487,7 @@ class PageThree(tk.Frame):
             return DataNotLoaded()
         DA = self.DA
 
-        """ Set Window """
+        """ Set window from interface settings """
         newWinSize = self.dataWindowSizeWidget.get()
         newWinStart = self.dataWindowStartWidget.get()
         limitDict=self.DA.getIndexLimits()
@@ -401,11 +496,12 @@ class PageThree(tk.Frame):
         self.setWindow( minVal=minVal, start=newWinStart,
                         maxSize=maxSize, size=newWinSize )
 
-        """ set view """
-        xSel = self.xViewSel.get()
-        ySel = self.yViewSel.get()
-        newView = [ xSel,ySel ]
-        debug("updateEvent: newView: "+str(newView))
+        """ Set views from interface settings """
+        newViewList = list()
+        for subFrame in self.dataViewSubFrameList :
+            newView = subFrame.getView()
+            debug("updateEvent: newView: "+str(newView))
+            newViewList.append(newView)
 
         """ set index """
         try :
