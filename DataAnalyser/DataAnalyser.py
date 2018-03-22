@@ -208,15 +208,34 @@ class DataAnalyser(object):
 
         self.altIndexCol = value
 
-    def setView(self, view=None, windowStart = None, windowSize=None, windowType=None) :
+    def setView(self, viewList=None, windowStart = None, windowSize=None, windowType=None) :
+        """ Set the analyser view
+
+        Parameters:
+        view : list of views, each view is a tuple of x,y data columns/names
+        """
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: no data loaded")
         goodLabels = self.getLabels()
-        if view is not None :
-            for item in view :
-                if item not in goodLabels :
-                    raise TypeError("ERROR: '"+str(item)+"' not a valid label")
-            self.currentView = view
+        if viewList is not None :
+            """ Okay, this is real data """
+            newViewList = list()
+            if isinstance(viewList, list) or isinstance(viewList,tuple) :
+                for view in viewList:
+                    if isinstance(view, list) or isinstance(view,tuple) :
+                        """ viewList must be a list of lists """
+                        for item in view :
+                            """ Validate each name in new view """
+                            if item not in goodLabels :
+                                raise TypeError("ERROR: '"+str(item)+"' not a valid label.")
+                        """ Okay, new view is valid, set currentview """
+                        newViewList.append(view)
+                    else :
+                        raise TypeError("view must be a list or tuple, also.")
+            else :
+                raise TypeError("viewList must be a list or tuple.")
+            """ At this point, the new views have been validated, so replace the current view """
+            self.currentView = newView
         if windowStart is not None :
             self.windowStart = windowStart
         if windowSize is not None :
