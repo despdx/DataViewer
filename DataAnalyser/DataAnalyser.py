@@ -227,15 +227,28 @@ class DataAnalyser(object):
                         for item in view :
                             """ Validate each name in new view """
                             if item not in goodLabels :
-                                raise TypeError("ERROR: '"+str(item)+"' not a valid label.")
-                        """ Okay, new view is valid, set currentview """
-                        newViewList.append(view)
+                                warnwarn("View contains invalid labels for this data set, ignoring")
+                                validView = True
+                        """ Okay, new view is validated, set currentview if passed."""
+                        if validView :
+                            newViewList.append(view)
+                        else :
+                            error("Was passed invalid view, ignoring it:"+str(view))
+                    elif view is None :
+                        """View maybe none if input not sanitized.  Fine, just
+                        ignore it."""
+                        warnwarn("View is 'None', ignoring.")
                     else :
                         raise TypeError("view must be a list or tuple, also.")
             else :
                 raise TypeError("viewList must be a list or tuple.")
-            """ At this point, the new views have been validated, so replace the current view """
-            self.currentView = newView
+            """At this point, the new views have been validated."""
+            """Accept the current view list, unless it's empty!"""
+            if len(newView) < 1 :
+                raise TypeError("New view did not pass validation.")
+            else :
+                """Okay, we can accept the new views that have passed validation"""
+                self.currentView = newView
         if windowStart is not None :
             self.windowStart = windowStart
         if windowSize is not None :
