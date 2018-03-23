@@ -212,23 +212,29 @@ class DataAnalyser(object):
         """ Set the analyser view
 
         Parameters:
-        view : list of views, each view is a tuple of x,y data columns/names
+        viewList : list of views, each view is a tuple of x,y data columns/names
         """
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+        debug("Got new view list:"+str(viewList))
         goodLabels = self.getLabels()
         if viewList is not None :
             """ Okay, this is real data """
             newViewList = list()
             if isinstance(viewList, list) or isinstance(viewList,tuple) :
                 for view in viewList:
+                    debug("new view:"+str(view))
+                    debug("new view type:"+str(type(view)))
                     if isinstance(view, list) or isinstance(view,tuple) :
                         """ viewList must be a list of lists """
+                        validView = True
                         for item in view :
                             """ Validate each name in new view """
                             if item not in goodLabels :
                                 warnwarn("View contains invalid labels for this data set, ignoring")
-                                validView = True
+                                validView = False
+                            else :
+                                debug("item okay:"+str(item))
                         """ Okay, new view is validated, set currentview if passed."""
                         if validView :
                             newViewList.append(view)
@@ -244,11 +250,11 @@ class DataAnalyser(object):
                 raise TypeError("viewList must be a list or tuple.")
             """At this point, the new views have been validated."""
             """Accept the current view list, unless it's empty!"""
-            if len(newView) < 1 :
-                raise TypeError("New view did not pass validation.")
+            if len(newViewList) < 1 :
+                raise TypeError("New view did not pass validation:"+str(viewList))
             else :
                 """Okay, we can accept the new views that have passed validation"""
-                self.currentView = newView
+                self.currentView = newViewList
         if windowStart is not None :
             self.windowStart = windowStart
         if windowSize is not None :

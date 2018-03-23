@@ -480,12 +480,12 @@ class PageThree(tk.Frame):
         #TODO
 
     def viewChangeTrace(self, *args):
+        """View is changed, make proper updates downward."""
         #print("DEBUG: viewChange: isSafeToUpdate", self.isSafeToUpdate)
         if not self.isSafeToUpdate :
             #print("DEBUG: viewChangeTrace: not safe, returning")
             return
-        newx, newy = ( self.xViewSel.get(), self.yViewSel.get() )
-        #print("DEBUG: viewChangeTrace: new selection:",str((newx,newy)) )
+        """Do other updates"""
         self.updateEvent(None)
 
     def setView(self, viewList) :
@@ -542,7 +542,7 @@ class PageThree(tk.Frame):
             """ just leave it set to index """
             pass
 
-        DA.setView( viewList=newView, windowStart=newWinStart, windowSize=newWinSize,
+        DA.setView( viewList=newViewList, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
 
         dfList = self.DA.getViewData()
