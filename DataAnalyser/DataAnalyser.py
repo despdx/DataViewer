@@ -303,8 +303,8 @@ class DataAnalyser(object):
             dfList = list()
             debug("currentView:"+ str(self.currentView))
             for viewpair in self.currentView :
-                df = self.df[mySlice]           # get slice of the data requested
-                df = df[ self.currentView ]     # get view
+                df = self.df[ list(viewpair) ]     # get view
+                df = df[mySlice]           # get slice of the data requested
                 dfList.append(df)
             return dfList
         else:
@@ -344,7 +344,7 @@ class DataAnalyser(object):
         statList = list()
         for df in dfList :
             statList.append( df.describe() )
-        return returnStatList
+        return statList
 
 class _DataNotLoaded(Exception) :
     """ Specialized error class for DataAnalyser
