@@ -195,17 +195,19 @@ class labelSelWidgetFrame(tk.Frame):
         """ Set new observer """
         self.tkStrVar.trace('w', func)
 
-    def setOptionList(self, strList):
-        self.tkselW['menu'].delete(0,tk.END)
+    def setOptionsList(self, strList):
+        self.tkSelW['menu'].delete(0,tk.END)
         for name in strList:
             debug("Adding name to option menu:"+str(name))
             self.tkSelW['menu'].add_command( label=name, command=tk._setit(self.tkStrVar,name) )
         self.enable()
 
     def enable(self):
+        self.isEnabled = True
         self.tkSelW.configure(state='normal')
 
     def disable(self):
+        self.isEnabled = False
         self.tkSelW.configure(state='disable')
 
     def configure(self, *args, **kwargs):
@@ -219,19 +221,39 @@ class viewWidgetGroupFrame(tk.Frame):
         tk.Frame.__init__(self, parent)
         """ A check button for on/off of this view """
         self.var = tk.IntVar()
-        self.checkButton = tk.Checkbutton(self, text=label, variable=self.var)
+        self.checkButton = tk.Checkbutton(self, text=label
+                ,variable=self.var
+                ,command=self._checkChangeHandler
+                ,offvalue=0,onvalue=1)
         self.checkButton.pack()
-        self.var.trace('w', self._checkChangeHandler)
         self.xViewSelFrame = labelSelWidgetFrame(self, label='Abscissa')
         self.xViewSelFrame.pack()
         self.yViewSelFrame = labelSelWidgetFrame(self, label='Ordinate')
         self.yViewSelFrame.pack()
+        self.isEnabled = False
+        self._disable()
 
     def enable(self):
+        """Programmatically enable this frame, causes change event just
+        like changing it from the GUI.
+        """
+        self.isEnabled = True
+        self.checkButton.select()
+
+    def _enable(self):
+        """Internally enable this frame."""
         self.xViewSelFrame.enable()
         self.yViewSelFrame.enable()
 
     def disable(self):
+        """Programmatically disable this frame, causes a button event just like
+        changing it from the GUI.
+        """
+        self.isEnabled = False
+        self.checkButton.deselect()
+
+    def _disable(self):
+        """Internally disable this frame."""
         self.xViewSelFrame.disable()
         self.yViewSelFrame.disable()
 
@@ -240,23 +262,34 @@ class viewWidgetGroupFrame(tk.Frame):
         self.yViewSelFrame.setEventHandler(func) 
 
     def setView(self, view):
-        self.xViewSelFrame.setSelValue(view[0])
-        self.yViewSelFrame.setSelValue(view[1])
+        if self.isEnabled :
+            self.xViewSelFrame.setSelValue(view[0])
+            self.yViewSelFrame.setSelValue(view[1])
+        else :
+            debug("This Data View set is disabled, so it will not be altered.")
 
     def getView(self):
-        xSel = self.xViewSelFrame.getSelValue()
-        ySel = self.yViewSelFrame.getSelValue()
-        return list(xSel,ySel)
+        if self.isEnabled :
+            xSel = self.xViewSelFrame.getSelValue()
+            ySel = self.yViewSelFrame.getSelValue()
+            return (xSel,ySel)
+        else :
+            return None
+
+    def setOptionsList(self, newList):
+        """ Update list of options in menu list """
+        self.xViewSelFrame.setOptionsList(newList)
+        self.yViewSelFrame.setOptionsList(newList)
 
     def _checkChangeHandler(self, event):
         if 1 == self.var.get():
             """ Check box was enabled. """
             debug("Check button was enabled.")
-            self.enable()
+            self._enable()
         elif 0 == self.var.get():
             """ Check box was disabled. """
             debug("Check button was disabled.")
-            self.disable()
+            self._disable()
         else :
             raise TypeError("Cannot interpret check button value"+str(self.var.get()))
 
@@ -324,12 +357,11 @@ class PageThree(tk.Frame):
             subFrame.setEventHandler(self.viewChangeTrace)
             subFrame.pack()
             self.dataViewSubFrameList.append(subFrame)
-        self.dataViewSubFrameList[0].enable()
 
         """ Data View Index Selection """
-        """
         self.altIdxSel = tk.StringVar(self)
         self.altIdxSel.set("No data") # default value
+        """
         self.altIdxSelW = tk.OptionMenu(self, self.altIdxSel, "No Data" )
         self.altIdxSelW.configure(state="disabled")
         self.altIdxSelW.pack()
@@ -425,26 +457,18 @@ class PageThree(tk.Frame):
         self.postLoad()
 
     def updateLabels(self) :
-        ''' Update labels from the DataAnalyser object
+        """ Update labels from the DataAnalyser object
         Call whenever DA is loaded/changed.
-        '''
+        """
         #print("DEBUG: updateLabels: isSafeToUpdate:", self.isSafeToUpdate)
         if not self.DA.isLoaded :
             return DataNotLoaded()
         newLabels = DA.getLabels()
-        #print("DEBUG: got label list from DA: "+str(newLabels))
-        ''' Delete old options from menu '''
-        self.dataViewXwidget['menu'].delete(0, tk.END)
-        self.dataViewYwidget['menu'].delete(0, tk.END)
-        self.altIdxSelW['menu'].delete(0, tk.END)
-        self.altIdxSelW['menu'].add_command( label='index', command=tk._setit(self.altIdxSel,'index') )
-        ''' Relabel the drop down menus'''
-        for label in newLabels :
-            debug("Adding label to option menu:"+str(label))
-            self.dataViewXwidget['menu'].add_command( label=label, command=tk._setit(self.xViewSel,label) )
-            self.dataViewYwidget['menu'].add_command( label=label, command=tk._setit(self.yViewSel,label) )
-            self.altIdxSelW['menu'].add_command( label=label, command=tk._setit(self.altIdxSel,label) )
-        ''' re-enable widgets '''
+        #debug("DEBUG: got label list from DA: "+str(newLabels))
+        for viewSubFrame in self.dataViewSubFrameList:
+            viewSubFrame.setOptionsList(newLabels)
+
+        """ re-enable widgets """
         self.activateWidgets()
 
     def updateFromCavas(self, event) :
@@ -471,6 +495,7 @@ class PageThree(tk.Frame):
         self.isSafeToUpdate = False
         for view,subFrame in zip(viewList,self.dataViewSubFrameList) :
             print("DEBUG: DataViewApp: setView: "+str(view))
+            subFrame.enable()               # must enable before setting
             subFrame.setView(view)
             # TODO Set active value in pulldown
 
@@ -501,7 +526,9 @@ class PageThree(tk.Frame):
         for subFrame in self.dataViewSubFrameList :
             newView = subFrame.getView()
             debug("updateEvent: newView: "+str(newView))
-            newViewList.append(newView)
+            if newView is not None :
+                """If view frame returns None, don't add to list."""
+                newViewList.append(newView)
 
         """ set index """
         try :
@@ -515,15 +542,20 @@ class PageThree(tk.Frame):
             """ just leave it set to index """
             pass
 
-        DA.setView( view=newView, windowStart=newWinStart, windowSize=newWinSize,
+        DA.setView( viewList=newView, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
 
-        df = self.DA.getViewData()
+        dfList = self.DA.getViewData()
         #print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
+        """Redraw the plot"""
         self.ax.clear()
-        self.ax.plot(df[xSel].values, df[ySel].values, 'bo-')
-        self.ax.set_xlabel(xSel)
-        self.ax.set_ylabel(ySel)
+        (xlabel, ylabel) = ('','')
+        for df in dfList :
+            """draw all df data as x,y data"""
+            (xlabel, ylabel) = df.columns.tolist()
+            self.ax.plot(df[xlabel].values, df[ylabel].values, 'o-')
+        self.ax.set_xlabel(xlabel)
+        self.ax.set_ylabel(ylabel)
         self.fig.canvas.show()
 
         """ Show Statistics """
