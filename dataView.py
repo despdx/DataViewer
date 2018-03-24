@@ -3,7 +3,8 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
-#TODO show more than one relation
+#TODO fix bugs disabling view
+#TODO enabling disabled view should assume primary view
 #TODO linear fit
 #TODO fix doc strings
 #TODO speed up update (without animation)
@@ -171,6 +172,7 @@ class labelSelWidgetFrame(tk.Frame):
         self.labelW = tk.Label(self, text=label, font=NORM_FONT)
         self.labelW.pack(side=tk.LEFT)
         self.tkStrVar = tk.StringVar(self)
+        self.tkStrVar.traceID = None
         self.tkSelW = tk.OptionMenu(self, self.tkStrVar, "No Data")
         self.disable()
         self.tkSelW.pack(side=tk.LEFT)
@@ -202,7 +204,7 @@ class labelSelWidgetFrame(tk.Frame):
         self.handler = newHandler
         if self.isEnabled :
             """ Set new observer """
-            self.tkStrVar.trace('w', self.handler)
+            self.tkStrVar.traceID = self.tkStrVar.trace('w', self.handler)
         else :
             debug(self.id+": setEventHandler: disabled, handler saved, but not setting until enabled.")
 
@@ -210,8 +212,8 @@ class labelSelWidgetFrame(tk.Frame):
         """ Remove old obserers """
         obsList = self.tkStrVar.trace_info()            # get list of observers
         debug("Got list of traces:"+str(obsList))       #
-        for pair in obsList :                           # each pair of observer identifiers
-            self.tkStrVar.remove(pair)                  # remove this observer
+        if self.tkStrVar.traceID is not None :
+            self.tkStrVar.trace_vdelete('u',self.tkStrVar.traceID)
 
     def setOptionsList(self, strList):
         self.unsetEventHandler()
