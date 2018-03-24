@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 '''
-#TODO fix bugs disabling view
 #TODO enabling disabled view should assume primary view
 #TODO linear fit
 #TODO fix doc strings
@@ -604,8 +603,10 @@ class PageThree(tk.Frame):
 
     def showStats(self):
         """ Get and report statsistics for the current view """
-        statString = self.DA.getStats()
-        print(statString)
+        statsList = self.DA.getStats()
+        for stats in statsList:
+            print("Data View Statistics:")
+            print(stats)
 
     def doChop(self) :
         directory=pathlib.PurePath(os.path.curdir)
