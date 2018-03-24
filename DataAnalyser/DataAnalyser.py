@@ -208,6 +208,10 @@ class DataAnalyser(object):
 
         self.altIndexCol = value
 
+    def validateView(self, viewList):
+        """TODO Move view validation code here"""
+        pass
+
     def setView(self, viewList=None, windowStart = None, windowSize=None, windowType=None) :
         """ Set the analyser view
 
@@ -251,10 +255,17 @@ class DataAnalyser(object):
             """At this point, the new views have been validated."""
             """Accept the current view list, unless it's empty!"""
             if len(newViewList) < 1 :
-                raise TypeError("New view did not pass validation:"+str(viewList))
+                """New views failed validation"""
+                debug("setView: All requested views failed validation.")
+                if len(self.currentView) >= 1 :
+                    """Old views exist, so, just keep that"""
+                    debug("setView: Keeping old views:"+str(self.currentView))
+                else :
+                    raise TypeError("New view did not pass validation:"+str(viewList))
             else :
                 """Okay, we can accept the new views that have passed validation"""
                 self.currentView = newViewList
+                debug("setView: Views updated: "+str(self.currentView))
         if windowStart is not None :
             self.windowStart = windowStart
         if windowSize is not None :
