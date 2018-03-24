@@ -212,8 +212,10 @@ class labelSelWidgetFrame(tk.Frame):
         """ Remove old obserers """
         obsList = self.tkStrVar.trace_info()            # get list of observers
         debug("Got list of traces:"+str(obsList))       #
-        if self.tkStrVar.traceID is not None :
-            self.tkStrVar.trace_vdelete('u',self.tkStrVar.traceID)
+        for pair in obsList :
+            self.tkStrVar.trace_vdelete('u', pair[1])
+        #if self.tkStrVar.traceID is not None :
+        #    self.tkStrVar.trace_vdelete('u',self.tkStrVar.traceID)
 
     def setOptionsList(self, strList):
         self.unsetEventHandler()
