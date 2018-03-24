@@ -6,8 +6,10 @@ them out for easier analysis.
 #TODO translation transform
 #TODO quadratic fit
 #TODO linear fit
+#TODO angle transform
 #TODO speed up update (without animation)
 #TODO filter data types
+#TODO save filters, named filters
 #TODO pick window from figure
 #TODO disable chop button until loaded
 #TODO scale scales
