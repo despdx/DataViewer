@@ -115,13 +115,20 @@ class DataViewApp(tk.Tk):
 
         """ build a menu bar """
         menubar = tk.Menu(container)
+        self.menubar = menubar
+        """Create file menu"""
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save settings", command=lambda: popupmsg('Not supported just yet!'))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=quit)
         menubar.add_cascade(label="File", menu=filemenu)
-        self.menubar = menubar
         self.filemenu = filemenu
+        """Transform Menu"""
+        self.transformMenu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Transform", menu=self.transformMenu)
+        """Curve Fit Menu"""
+        self.fitMenu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Curve Fit", menu=self.fitMenu)
 
         """ Finish Menu bar """
         tk.Tk.config(self,menu=menubar)
