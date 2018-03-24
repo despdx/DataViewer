@@ -76,8 +76,8 @@ configDefault = {
         }
 
 class DataViewApp(tk.Tk):
-    ''' Data View Application Class
-    '''
+    """ Data View Application Class
+    """
 
     headerRow = 0
     windowType = 'index'
@@ -95,8 +95,7 @@ class DataViewApp(tk.Tk):
         """
 
         tk.Tk.__init__(self, *args, **kwargs)
-        ''' Build the application (main) window
-        '''
+        """ Build the application (main) window """
         #tk.Tk.iconbitmap(self, default="clienticon.ico")
         tk.Tk.wm_title(self, "Data Viewer")
 
@@ -104,7 +103,7 @@ class DataViewApp(tk.Tk):
         self.DVconfig = configer.Configer(configDefault)
         self.testValue = 'hi there'
         
-        ''' Arrange "this" frame '''
+        """ Arrange "this" frame """
         self.minsize(640,480)
         #self.geometry("640x480")
         container = tk.Frame(self)
@@ -112,7 +111,7 @@ class DataViewApp(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        ''' build a menu bar '''
+        """ build a menu bar """
         menubar = tk.Menu(container)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save settings", command=lambda: popupmsg('Not supported just yet!'))
@@ -122,15 +121,15 @@ class DataViewApp(tk.Tk):
         self.menubar = menubar
         self.filemenu = filemenu
 
-        ''' Finish Menu bar '''
+        """ Finish Menu bar """
         tk.Tk.config(self,menu=menubar)
 
-        ''' Initialize Data Viewer '''
+        """ Initialize Data Viewer """
         self.DA = DA
 
-        ''' Make a dictionary of different frame types (classes) that
+        """ Make a dictionary of different frame types (classes) that
         we will use for the application.
-        '''
+        """
         self.frames = {}
         for newFrame in (StartPage, PageThree):
 
@@ -140,12 +139,12 @@ class DataViewApp(tk.Tk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
-        ''' Show the starting frame type on init '''
+        """ Show the starting frame type on init """
         self.show_frame(PageThree)
 
     def show_frame(self, cont):
-        ''' method for switching content
-        '''
+        """ method for switching content
+        """
 
         frame = self.frames[cont]
         frame.tkraise()
@@ -340,7 +339,7 @@ class PageThree(tk.Frame):
     def __init__(self, parent, controller, **kwargs):
         tk.Frame.__init__(self, parent) # call class parent
 
-        ''' Initialize data members '''
+        """ Initialize data members """
         self.DA = DA
         self.isSafeToUpdate = False
         self.numViews = 2
@@ -348,16 +347,16 @@ class PageThree(tk.Frame):
 
         self.DVconfig = controller.DVconfig
 
-        ''' Create label for frame '''
+        """ Create label for frame """
         label = tk.Label(self, text="Data View", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
 
-        ''' Create button to go back to other frame '''
+        """ Create button to go back to other frame """
         button1 = ttk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        ''' Add menu item to load data '''
+        """ Add menu item to load data """
         filemenu = controller.filemenu
         filemenu.insert_command(index=1,label="Load", command=self.load)
 
@@ -408,7 +407,7 @@ class PageThree(tk.Frame):
         """
 
     def addDataWindow(self) :
-        ''' Data Window Size Widget '''
+        """ Data Window Size Widget """
         self.dataWindowSizeWidgetLabel = tk.Label(self, text='View Size')
         self.dataWindowSizeWidgetLabel.pack()
         self.dataWindowSizeWidget = tk.Scale(self, from_=1, to=10, resolution=1,
@@ -416,7 +415,7 @@ class PageThree(tk.Frame):
         self.dataWindowSizeWidget.bind("<ButtonRelease-1>", self.updateEvent)
         self.dataWindowSizeWidget.bind("<Button1-Motion>", self.updateEvent)
         self.dataWindowSizeWidget.pack(fill=tk.X,expand=1)
-        ''' Data Window Start Widget '''
+        """ Data Window Start Widget """
         self.dataWindowStartWidgetLabel = tk.Label(self, text='View Start')
         self.dataWindowStartWidgetLabel.pack()
         self.dataWindowStartWidget = tk.Scale(self, from_=0, to=10, resolution=1,
@@ -426,7 +425,7 @@ class PageThree(tk.Frame):
         self.dataWindowStartWidget.pack(fill=tk.X,expand=1)
 
     def addMainFigure(self) :
-        ''' Add main figure area '''
+        """ Add main figure area """
         self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         self.ax.set_title('No data')
@@ -470,7 +469,7 @@ class PageThree(tk.Frame):
         self.updateEvent(None)      # update GUI
 
     def setWindow(self, minVal=0, start=0, maxSize=10, size=10) :
-        ''' set the GUI values that correspond to the window '''
+        """ set the GUI values that correspond to the window """
         #print("DEBUG: setWindow:"+str(minVal)
         #        +", start:"+str(start)
         #        +", maxSize:"+str(maxSize)
@@ -481,16 +480,15 @@ class PageThree(tk.Frame):
         self.dataWindowStartWidget.set(start)
 
     def load(self, *args, **kwargs) :
-        ''' catch all load method
+        """ catch all load method
         Currently, the only implemented mode is CSV file data.
-        '''
+        """
         self.isSafeToUpdate = False
         name = filedialog.askopenfilename()
         self.loadFileData(path=name, *args, **kwargs)
 
     def loadFileData(self, *args, path=None, **kwargs) :
-        ''' Show a dialog to select a file and load it.
-        '''
+        """ Show a dialog to select a file and load it.  """
         print("Got filename:" +path)
         loadData(path, *args, **kwargs)
         self.postLoad()
