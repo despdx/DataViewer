@@ -166,6 +166,8 @@ class labelSelWidgetFrame(tk.Frame):
 
     def __init__(self, parent, label='selector'):
         tk.Frame.__init__(self, parent)
+        self.handler = None
+        self.id = str(label)
         self.labelW = tk.Label(self, text=label, font=NORM_FONT)
         self.labelW.pack(side=tk.LEFT)
         self.tkStrVar = tk.StringVar(self)
@@ -183,32 +185,54 @@ class labelSelWidgetFrame(tk.Frame):
         return self.tkStrVar.get()
 
     def setSelValue(self, value):
-        return self.tkStrVar.set(value)
+        self.unsetEventHandler()
+        retval = self.tkStrVar.set(value)
+        self.setEventHandler()
 
-    def setEventHandler(self, func):
+    def setEventHandler(self, func=None):
         """ Set a new event handler on the menu """
+        newHandler = None
+        if func is not None :
+            """Use new handler, if we get one"""
+            newHandler = func
+        elif self.handler is not None :
+            """Use old handler"""
+            newHandler = self.handler
+
+        self.handler = newHandler
+        if self.isEnabled :
+            """ Set new observer """
+            self.tkStrVar.trace('w', self.handler)
+        else :
+            debug(self.id+": setEventHandler: disabled, handler saved, but not setting until enabled.")
+
+    def unsetEventHandler(self):
         """ Remove old obserers """
         obsList = self.tkStrVar.trace_info()            # get list of observers
         debug("Got list of traces:"+str(obsList))       #
         for pair in obsList :                           # each pair of observer identifiers
             self.tkStrVar.remove(pair)                  # remove this observer
-        """ Set new observer """
-        self.tkStrVar.trace('w', func)
 
     def setOptionsList(self, strList):
+        self.unsetEventHandler()
         self.tkSelW['menu'].delete(0,tk.END)
         for name in strList:
             debug("Adding name to option menu:"+str(name))
             self.tkSelW['menu'].add_command( label=name, command=tk._setit(self.tkStrVar,name) )
-        self.enable()
+        self.setEventHandler()
 
     def enable(self):
-        self.isEnabled = True
-        self.tkSelW.configure(state='normal')
+        if self.handler is not None :
+            self.isEnabled = True
+            self.setEventHandler(self.handler)
+            self.tkSelW.configure(state='normal')
+        else :
+            error(self.id+": Cannot enable, set event handler first.")
 
     def disable(self):
-        self.isEnabled = False
+        self.unsetEventHandler()
         self.tkSelW.configure(state='disable')
+        self.isEnabled = False
 
     def configure(self, *args, **kwargs):
         if 'state' in kwargs.keys():
@@ -219,6 +243,7 @@ class viewWidgetGroupFrame(tk.Frame):
 
     def __init__(self, parent, label="Enable"):
         tk.Frame.__init__(self, parent)
+        self.handler = None
         """ A check button for on/off of this view """
         self.var = tk.IntVar()
         self.checkButton = tk.Checkbutton(self, text=label
@@ -230,68 +255,79 @@ class viewWidgetGroupFrame(tk.Frame):
         self.xViewSelFrame.pack()
         self.yViewSelFrame = labelSelWidgetFrame(self, label='Ordinate')
         self.yViewSelFrame.pack()
+        """Set default state"""
         self.isEnabled = False
         self._disable()
+        self.id = str(label)            # debug id
 
     def enable(self):
         """Programmatically enable this frame, causes change event just
         like changing it from the GUI.
         """
-        self.isEnabled = True
+        debug(self.id+": enable: called")
+        #self.isEnabled = True
         self.checkButton.select()
+        self._enable()
 
     def _enable(self):
         """Internally enable this frame."""
         self.xViewSelFrame.enable()
         self.yViewSelFrame.enable()
+        self.isEnabled = True
 
     def disable(self):
         """Programmatically disable this frame, causes a button event just like
         changing it from the GUI.
         """
-        self.isEnabled = False
+        debug(self.id+": disable: called")
+        #self.isEnabled = False
         self.checkButton.deselect()
+        self._disable()
 
     def _disable(self):
         """Internally disable this frame."""
+        self.isEnabled = False
         self.xViewSelFrame.disable()
         self.yViewSelFrame.disable()
 
     def setEventHandler(self, func):
+        self.handler = func
         self.xViewSelFrame.setEventHandler(func)
         self.yViewSelFrame.setEventHandler(func) 
 
     def setView(self, view):
-        if self.isEnabled :
-            self.xViewSelFrame.setSelValue(view[0])
-            self.yViewSelFrame.setSelValue(view[1])
-        else :
-            debug("This Data View set is disabled, so it will not be altered.")
+        self.xViewSelFrame.setSelValue(view[0])
+        self.yViewSelFrame.setSelValue(view[1])
 
     def getView(self):
+        debug(self.id+": getView: isEnabled:"+str(self.isEnabled))
+        retval = None
         if self.isEnabled :
             xSel = self.xViewSelFrame.getSelValue()
             ySel = self.yViewSelFrame.getSelValue()
-            return (xSel,ySel)
-        else :
-            return None
+            retval = (xSel,ySel)
+            debug(self.id+": getView: (xSel,ySel):"+str(retval))
+        return retval
 
     def setOptionsList(self, newList):
         """ Update list of options in menu list """
         self.xViewSelFrame.setOptionsList(newList)
         self.yViewSelFrame.setOptionsList(newList)
 
-    def _checkChangeHandler(self, event):
+    def _checkChangeHandler(self):
         if 1 == self.var.get():
             """ Check box was enabled. """
-            debug("Check button was enabled.")
+            debug(self.id+": Check button was enabled.")
             self._enable()
         elif 0 == self.var.get():
             """ Check box was disabled. """
-            debug("Check button was disabled.")
+            debug(self.id+": Check button was disabled.")
             self._disable()
         else :
             raise TypeError("Cannot interpret check button value"+str(self.var.get()))
+        """Call external handler, too."""
+        if self.handler is not None :
+            self.handler(None)
 
 class PageThree(tk.Frame):
     """Frame showing Data View and chop capabilities
@@ -346,9 +382,7 @@ class PageThree(tk.Frame):
 
     def addDataView(self) :
         """ Add widgets that control the view """
-        #self.viewList = list(('No Data','No Data'),('No Data','No Data'))
         self.viewList = list(('No Data','No Data'))
-        self.dataViewWidgetDict = dict()
 
         """ Add View Widget Sub-Frames """
         self.dataViewSubFrameList = list()              # list of "subframes"
@@ -412,15 +446,16 @@ class PageThree(tk.Frame):
         self.chopButtonW = chopBW
 
     def postLoad(self) :
-        ''' Things to run after loading a new DataAnalyser object.
-        '''
-        self.updateLabels() # get new data types from data loaded
-        viewList = self.DA.getView() # retrieve the default view after load
-        self.setView(viewList) # configure GUI to reflect new data
+        """ Things to run after loading a new DataAnalyser object.  """
+        debug("postLoad: get current view from DA...")
+        viewList = self.DA.getView()                    # retrieve the default view after load
+        debug("postLoad: get labels from DA...")
+        self.updateLabels()                             # get new data types from data loaded
         self.setAltIndex('index')
+        self.setView(viewList)                          # configure GUI to reflect new data
         self.isSafeToUpdate = True
-        #print("DEBUG: postLoad: isSafeToUpdate", self.isSafeToUpdate)
-        ''' now, set the window '''
+        debug("postLoad: isSafeToUpdate:"+str(self.isSafeToUpdate))
+        """ now, set the window """
         #TODO use data values instead of index values
         limitDict=self.DA.getIndexLimits()
         maxSize, minVal = ( limitDict['max'] , limitDict['min'] )
@@ -481,7 +516,7 @@ class PageThree(tk.Frame):
 
     def viewChangeTrace(self, *args):
         """View is changed, make proper updates downward."""
-        #print("DEBUG: viewChange: isSafeToUpdate", self.isSafeToUpdate)
+        debug("viewChange: isSafeToUpdate:"+str(self.isSafeToUpdate))
         if not self.isSafeToUpdate :
             #print("DEBUG: viewChangeTrace: not safe, returning")
             return
@@ -493,11 +528,12 @@ class PageThree(tk.Frame):
         Takes a "view" object and sets the GUI so that it matches.
         """
         self.isSafeToUpdate = False
+        self.viewList = viewList
         for view,subFrame in zip(viewList,self.dataViewSubFrameList) :
             print("DEBUG: DataViewApp: setView: "+str(view))
-            subFrame.enable()               # must enable before setting
+            subFrame.disable()
             subFrame.setView(view)
-            # TODO Set active value in pulldown
+            subFrame.enable()
 
     def setAltIndex(self, newIdx):
         """ Set the GUI presentation of alt index """
@@ -508,6 +544,7 @@ class PageThree(tk.Frame):
         """ Change/Update data view when user requests a change.
         Call this whenever the user makes a change to view values.
         """
+        debug("updateEvent: called, event:"+str(event))
         if not self.DA.isLoaded :
             return DataNotLoaded()
         DA = self.DA
