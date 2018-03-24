@@ -1,24 +1,25 @@
 #!/usr/bin/python3
-''' DataView Application
+""" DataView Application
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
-'''
-#TODO enabling disabled view should assume primary view
+"""
+#TODO translation transform
+#TODO quadratic fit
 #TODO linear fit
-#TODO fix doc strings
 #TODO speed up update (without animation)
 #TODO filter data types
 #TODO pick window from figure
 #TODO disable chop button until loaded
-#TODO secondary views
 #TODO scale scales
 #TODO WIP Alternate indexes, need to be able to change scales first
 #TODO animation
+#TODO fix doc strings
 #TODO start on start frame, show PageThree after load
 #TODO better window and view widget layouts
 #TODO use pymagic to detect file types
 #TODO ? fix NotImplementedError class
 #TODO show summary statistics for view in GUI
+#TODO enabling disabled view should assume primary view
 
 import matplotlib as mpl
 mpl.use("TkAgg")
