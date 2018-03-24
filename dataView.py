@@ -350,13 +350,13 @@ class PageThree(tk.Frame):
         self.DVconfig = controller.DVconfig
 
         """ Create label for frame """
-        label = tk.Label(self, text="Data View", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
+        #label = tk.Label(self, text="Data View", font=LARGE_FONT)
+        #label.pack(pady=10,padx=10)
 
         """ Create button to go back to other frame """
-        button1 = ttk.Button(self, text="Back to Home",
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        #button1 = ttk.Button(self, text="Back to Home",
+        #                    command=lambda: controller.show_frame(StartPage))
+        #button1.pack()
 
         """ Add menu item to load data """
         filemenu = controller.filemenu
