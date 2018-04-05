@@ -104,8 +104,10 @@ class DataViewApp(tk.Tk):
 
         """ Load default configuration """
         self.DVconfig = configer.Configer(configDefault)
-        self.testValue = 'hi there'
         
+        """ Initialize Data Viewer """
+        self.DA = DA
+
         """ Arrange "this" frame """
         self.minsize(640,480)
         #self.geometry("640x480")
@@ -124,18 +126,27 @@ class DataViewApp(tk.Tk):
         filemenu.add_command(label="Exit", command=quit)
         menubar.add_cascade(label="File", menu=filemenu)
         self.filemenu = filemenu
+
         """Transform Menu"""
-        self.transformMenu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Transform", menu=self.transformMenu)
+        self.transformMenu = tk.Menu(menubar, tearoff=0)            #create a menu
+        self.transformOpts = self.DA.getTransformOptions()          #get dict of transforms from DA
+        self.transformConfig = dict()
+        for key in self.transformOpts.keys():
+            """Each key is a different transform capability.  Add a menu entry
+            for it, and make the action to launch a dialog box. """
+            self.transformMenu.add_command(label=key
+                ,command=lambda: self.launchDialog(
+                    DVdialog, self, self.transformConfig, **self.transformOpts[key]
+                    )
+                )
+        menubar.add_cascade( label="Transform", menu=self.transformMenu)    #Finally, add new menu to main menubar
+
         """Curve Fit Menu"""
         self.fitMenu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Curve Fit", menu=self.fitMenu)
 
         """ Finish Menu bar """
         tk.Tk.config(self,menu=menubar)
-
-        """ Initialize Data Viewer """
-        self.DA = DA
 
         """ Make a dictionary of different frame types (classes) that
         we will use for the application.
@@ -151,6 +162,21 @@ class DataViewApp(tk.Tk):
 
         """ Show the starting frame type on init """
         self.show_frame(PageThree)
+
+    def launchDialog(self, dialogClass, parentForDialog, returnDict, **initDict):
+        """Launch a dialog box and wait for it.
+
+        Parameters:
+        dialogClass: class name
+        parentForDialog: reference to the TK parent of the dailog box to be
+        launched.
+        returnDict: dict to which new values from the dialog will be placed
+        initDict: dict to pass to the constructor of dialogClass
+
+        Returns: none
+        """
+        dialogWidget = dialogClass(parentForDialog, returnDict, **initDict) # dialog constructor
+        parentForDialog.wait_window(dialogWidget.top)                       # pause the parent until window is destroyed
 
     def show_frame(self, cont):
         """ method for switching content
@@ -650,6 +676,85 @@ def quitHandler():
     print("Quitting...")
     #TODO Call root window.quit()
     quit()
+
+class LabelEntryFrame(tk.Frame):
+    """Frame holding a label and a entry widget horizontally aligned"""
+
+    def __init__(self, parent, label, strValue):
+        debug("got label:{}; string:{}".format(label,strValue))
+        tk.Frame.__init__(self, parent)
+        labelW = tk.Label(self, text=str(label), font=NORM_FONT)
+        labelW.pack(side=tk.LEFT,padx=5)
+        entryW = tk.Entry(self)
+        entryW.pack(side=tk.LEFT,padx=5)
+        entryW.delete(0,tk.END)
+        entryW.insert(0,str(strValue))
+        self.entryW = entryW
+
+    def get(self):
+        return self.entryW.get()
+
+class DVdialog:
+    def __init__(self, parent, returnDict, **kwargs):
+        self.parent = parent
+        top = self.top = tk.Toplevel(parent)
+        self.retDict = returnDict
+        self.entryWidgetDict = dict()
+        label=kwargs['label']
+        tk.Label(top, text=label).pack()
+
+        #self.e = tk.Entry(top)
+        #self.e.pack(padx=5)
+        self._buildEntryWidgets(**kwargs)
+
+        b = tk.Button(top, text="OK", command=self.ok)
+        b.pack(pady=5)
+
+    def _buildEntryWidgets(self, **kwargs):
+        for key in kwargs.keys():
+            if key not in ('label','func'):             # don't expose these as options
+                debug("Adding dialog option:"+str(key))
+                """For each key, build small frame for label and input entry widget"""
+                entryFrame = LabelEntryFrame(self.top, key, kwargs[key])
+                entryFrame.pack()
+                self.entryWidgetDict[key] = entryFrame
+
+    def _extractEntryValues(self):
+        """Go through all entry widgets, get new values, store in return
+        dictionary provided by caller"""
+        for key in self.entryWidgetDict.keys():
+            e = self.entryWidgetDict[key]
+            self.retDict[key] = e.get()
+
+    def ok(self):
+        self._extractEntryValues()
+        self.top.destroy()
+
+def convertBack(strValue):
+    """Take a value and try to convert it to the most restrictive data type.
+    Parameters:
+    value: *string* value to convert to a numerical type, if possible.
+
+    Returns:
+    Int, if possible; otherwise float, or, if that is not possible, either, a
+    string.
+    """
+    try :
+        retVal = int(value)
+    except ValueError:
+        try :
+            retVal = float(value)
+        except ValueError:
+            retVal = str(value)
+
+    return retVal 
+
+'''
+def dictToMenu(menu, dct):
+    for key in dct.keys():
+        menu.add_command(label=dct['label'], command=pass)
+'''
+
 
 if __name__ == "__main__" :
     app = DataViewApp()
