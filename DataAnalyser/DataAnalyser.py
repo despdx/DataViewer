@@ -43,6 +43,12 @@ def _writeCSV(pandasDF, filename, *args, **kwargs) :
 def _writeHDF(pandasDF, filename, *args, **kwargs) :
     pandasDF.to_hdf(filename, *args, **kwargs)
 
+def fixedTransform(pandasDF, **kwargs) :
+    pass
+
+def fitLinear(pandasDF, **kwargs) :
+    pass
+
 class DataAnalyser(object):
     '''
     Helper object for reading some common data types and exploring them.
@@ -80,6 +86,24 @@ class DataAnalyser(object):
                 }
             }
 
+    """Transformation Options"""
+    __transforms = {
+            'fixed'         : {
+                'label'         : 'Fixed Translation Transform'
+                ,'xTrans'       : 0.0
+                ,'yTrans'       : 0.0
+                ,'func'         : fixedTransform
+                }
+            }
+
+    """ Curve Fit Options """
+    __fits = {
+            'linear'        : {
+                'label'         : 'Linear Curve Fit'
+                ,'func'         : fitLinear
+            }
+        }
+
     def getDefaultConfig(self) :
         defaultDict = dict()
         for key in self.configDef :
@@ -93,6 +117,14 @@ class DataAnalyser(object):
         and write.
         """
         return DataAnalyser.__readTypes.keys()
+
+    @staticmethod
+    def getFitOptions() :
+        return DataAnalyser.__fits
+
+    @staticmethod
+    def getTransformOptions() :
+        return DataAnalyser.__transforms
 
     def __init__(self, initObj=None, *args, **kwargs):
         self.isLoaded = False

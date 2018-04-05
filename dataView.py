@@ -12,6 +12,7 @@ them out for easier analysis.
 #TODO save filters, named filters
 #TODO pick window from figure
 #TODO disable chop button until loaded
+#TODO error when cancelling load
 #TODO scale scales
 #TODO WIP Alternate indexes, need to be able to change scales first
 #TODO animation
