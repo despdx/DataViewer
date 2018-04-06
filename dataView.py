@@ -37,6 +37,7 @@ import pathlib
 from logging import *
 basicConfig(level=ERROR)
 from warnings import warn as warnwarn
+from numbers import Number
 
 import tkinter as tk
 from tkinter import ttk
@@ -211,6 +212,9 @@ class labelSelWidgetFrame(tk.Frame):
         self.tkSelW = tk.OptionMenu(self, self.tkStrVar, "No Data")
         self.disable()
         self.tkSelW.pack(side=tk.LEFT)
+
+    def get(self):
+        return self.getSelValue()
 
     def getSelWidet(self):
         return self.tkSelW
@@ -694,6 +698,34 @@ class LabelEntryFrame(tk.Frame):
     def get(self):
         return self.entryW.get()
 
+class LabelCheckFrame(tk.Frame):
+    """Frame holding a label and a checkbox widget horizontally aligned"""
+
+    def __init__(self, parent, boolVal):
+        debug("got boolval:{}".format(boolVal))
+        tk.Frame.__init__(self, parent)
+        var = tk.BooleanVar()
+        checkBoxW = tk.Checkbutton(self, text="Enabled", variable=var
+                ,onvalue=True, offvalue=False)
+        checkBoxW.pack(side=tk.LEFT,padx=5)
+        self.var = var
+        self.checkBoxW = checkBoxW
+
+        if boolVal :
+            self.enable()
+        else :
+            self.disable()
+
+    def get(self):
+        return bool(self.var.get())
+
+    def enable(self):
+        self.checkBoxW.select()
+
+    def disable(self):
+        self.checkBoxW.deselect()
+
+
 class DVdialog:
     def __init__(self, parent, returnDict, **kwargs):
         self.parent = parent
@@ -714,10 +746,25 @@ class DVdialog:
         for key in kwargs.keys():
             if key not in ('label','func'):             # don't expose these as options
                 debug("Adding dialog option:"+str(key))
-                """For each key, build small frame for label and input entry widget"""
-                entryFrame = LabelEntryFrame(self.top, key, kwargs[key])
-                entryFrame.pack()
-                self.entryWidgetDict[key] = entryFrame
+                """For each key, make a widget for display and recording of the value."""
+                currentValue = kwargs[key]
+                if isinstance(currentValue, bool) :
+                    """Boolean value; use check box widget."""
+                    checkBoxFrame= LabelCheckFrame(self.top,currentValue)
+                    checkBoxFrame.pack()
+                    self.entryWidgetDict[key] = checkBoxFrame
+                elif isinstance(currentValue, (Number, str)) :
+                    """Number or string value; use entry widget."""
+                    entryFrame = LabelEntryFrame(self.top, key, kwargs[key])
+                    entryFrame.pack()
+                    self.entryWidgetDict[key] = entryFrame
+                elif isinstance(currentValue,(list,tuple)):
+                    """List value; use option list."""
+                    optListFrame = labelSelWidgetFrame(self.top,label=key)
+                    optListFrame.pack()
+                    self.entryWidgetDict[key] = optListFrame
+                else :
+                    error("Cannot make widget for variable type: {}".format(currentValue))
 
     def _extractEntryValues(self):
         """Go through all entry widgets, get new values, store in return

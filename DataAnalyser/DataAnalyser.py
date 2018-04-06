@@ -92,6 +92,7 @@ class DataAnalyser(object):
                 'label'         : 'Fixed Translation Transform'
                 ,'xTrans'       : 0.0
                 ,'yTrans'       : 0.0
+                ,'Enabled'      : True
                 ,'func'         : fixedTransform
                 }
             }
@@ -100,6 +101,7 @@ class DataAnalyser(object):
     __fits = {
             'linear'        : {
                 'label'         : 'Linear Curve Fit'
+                ,'Enabled'      : False
                 ,'func'         : fitLinear
             }
         }
