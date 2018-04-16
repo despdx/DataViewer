@@ -23,6 +23,7 @@ from logging import *
 basicConfig(level=ERROR)
 from warnings import warn as warnwarn
 import configer
+from numbers import Number
 
 def _loadCSV(filename, *args, **kwargs) :
     return pd.read_csv(filename, *args, **kwargs)
@@ -84,6 +85,10 @@ class DataAnalyser(object):
                 'default'   : 'csv'
                 ,'func'     : lambda p: isinstance(p,str) and (p in DataAnalyser.getSupprtedFormats())
                 }
+            ,'indexSpecialName' : {
+                'default'   : 'Internal Index'
+                ,'func'     : lambda s: isinstance(s,str) and (len(s) >= 1 and len(s) <= 32)
+                }
             }
 
     """Transformation Options"""
@@ -142,6 +147,7 @@ class DataAnalyser(object):
         if kwargs is not None :
             for key,val in kwargs.items() :
                 self.__config[key] = val
+        self.indexName = self.__config['indexSpecialName']
 
     def __setDefaultView(self):
         if not self.isLoaded :
@@ -150,33 +156,25 @@ class DataAnalyser(object):
         self.windowSize = self.df.shape[0]
         self.windowType = 'index'
         self.altIndexCol = 'index'
+
         """ Create a default view of the fist column only.  One column is
-        technically okay, but, rest of implementation may assume otherwise."""
-        columns = self.df.columns.tolist()
-        if isinstance(self.indexCol, int) :
-            """ Caller specified a particular column for index, use it for the
-            default abscissa and the next one as the default ordinate. """
-            self.currentView = [ (columns[self.indexCol],columns[self.indexCol+1]) ]
-        elif isinstance(self.indexCol, bool):
-            if False == self.indexCol :
-                """ Assume first and second columns are reasonable choices """
-                self.currentView = [ (columns[0],columns[0]) ]
-                if columns.size > 1 :
-                    self.currentView = [ columns[0:2].tolist() ]
-            else : 
-                raise TypeError("Cannot interpret index column == True")
-        else :
-            raise TypeError('Cannot interpret index column type specification:'
-                +str(self.indexCol)
-                +', which is of type:'+str(type(self.indexCol))
-                )
+        technically okay, but, rest of implementation may assume otherwise.
+        """
+        """At minimum, there must be and index and one column, so we know
+        that a good default is:"""
+        currentView = [ [self.indexName, self.plotColumns[0] ] ]
+        """If there is more than one plot-able column, choose the first two"""
+        if len(self.plotColumns) > 2 :
+            currentView = [self.plotColumns[0:2] ]
+        """Keep forgetting the view is a list of lists!"""
+        assert(isinstance(currentView[0],list))
+        self.currentView = currentView
 
     def getConfig(self) :
         return self.__config.getConfig()
 
     def load(self, *args, filetype='csv', filename=None, **kwargs):
         """ Determine which file to load """
-        self.indexCol = kwargs['index_col']
         if filename == None :
             raise Exception('No filename provided.')
         else :
@@ -186,6 +184,7 @@ class DataAnalyser(object):
         loadFunc = DataAnalyser.__readTypes[filetype]
         self.df = loadFunc(filename, *args, **kwargs)
         debug("load:Loaded new data file: head:"+str(self.df.head()))
+        self.indexCol = kwargs['index_col']
         self.isLoaded = True
         self.cleanData()
         self.__setDefaultView()
@@ -194,7 +193,15 @@ class DataAnalyser(object):
     def cleanData(self) :
         #data.dropna(inplace=True)
         #data.reset_index(drop=True)
-        info("Not yet implemented.")
+        """Pull out column names for plot-able column data"""
+        #self.plotColumns = self.df.columns[ self.columnDataIsPlotable(e) for e in self.df.columns.tolist() ]
+        self.plotColumns = list()
+        for label in self.df.columns.tolist() :
+            """For each lable, check against function, store"""
+            if self.columnDataIsPlotable(label):
+                self.plotColumns.append(label)
+        debug("Got {} plot-able columns: {}".format(len(self.plotColumns),self.plotColumns))
+        info("Not yet fully implemented.")
 
     def getColumnList(self) :
         if not self.isLoaded :
@@ -204,21 +211,23 @@ class DataAnalyser(object):
     def getLabels(self):
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: getLabels: no data loaded")
-        return self.df.columns
+        return self.plotColumns
+
+    def columnDataIsPlotable(self, name):
+        """Check data in the column named 'name' to make sure we can plot it
+        Cannot plot anything but ints and floats.
+        """
+        return isinstance(self.df[name].iloc[0], Number)
 
     def isValidColumn(self, name):
-        return name in self.df.columns
+        """Check if 'name' is in the DataFrame."""
+        return (name in self.df.columns.tolist())
 
     def isIndexable(self, name):
         """ Determine whether or not the given column can be used as an index. """
         retVal = False
         if isValidColumn(name):
             series = self.df[name]
-            """ is it numeric ? """
-            try :
-                series.min()
-            except Exception as e:
-                warnwarn('Column is not usable as an index:'+str(name))
             """ Are all values unique? """
             if series.duplicated().any():
                 """ Are the values ordered? """
