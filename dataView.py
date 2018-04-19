@@ -27,7 +27,8 @@ them out for easier analysis.
 
 import matplotlib as mpl
 mpl.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvas
+from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar
 #from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
@@ -470,17 +471,17 @@ class PageThree(tk.Frame):
         self.fig = plt.figure(figsize=(5,4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         self.ax.set_title('No data')
-        self.fig.canvas.show()
+        self.fig.canvas.draw()
 
-        self.canvas = FigureCanvasTkAgg(self.fig, self)
+        self.canvas = FigureCanvas(self.fig, self)
         """ Set up callback from canvas draw events, i.e. pan/zoom """
         #self.cid1 = self.fig.canvas.mpl_connect('draw_event', self.updateFromCavas)
         #self.cid1 = self.fig.canvas.mpl_connect('button_release_event', self.updateFromCavas)
         #TODO animation
-        self.canvas.show()
+        self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-        toolbar = NavigationToolbar2TkAgg(self.canvas, self)
+        toolbar = NavigationToolbar(self.canvas, self)
         toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
@@ -636,7 +637,7 @@ class PageThree(tk.Frame):
             self.ax.plot(df[xlabel].values, df[ylabel].values, 'o-')
         self.ax.set_xlabel(xlabel)
         self.ax.set_ylabel(ylabel)
-        self.fig.canvas.show()
+        self.fig.canvas.draw()
 
         """ Show Statistics """
         self.showStats()
