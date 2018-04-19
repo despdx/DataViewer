@@ -13,6 +13,8 @@ Data Analyser Helper
 #TODO WIP remove configuration
 #TODO ML fits
 #TODO GUI summary statistics
+#TODO allow index to beselected in main view
+#TODO Index Views
 
 import pandas as pd
 import numpy as np
@@ -45,7 +47,14 @@ def _writeHDF(pandasDF, filename, *args, **kwargs) :
     pandasDF.to_hdf(filename, *args, **kwargs)
 
 def fixedTransform(pandasDF, **kwargs) :
-    pass
+    newDF = pandasDF.copy()
+    (x,y) = newDF.columns.tolist()
+    transformDict = {
+            x   : lambda x: x + kwargs['xTrans'],
+            y   : lambda y: y + kwargs['yTrans']
+            }
+    newDF = newDF.agg(transformDict)
+    return newDF
 
 def fitLinear(pandasDF, **kwargs) :
     pass
@@ -365,10 +374,26 @@ class DataAnalyser(object):
             for viewpair in self.currentView :
                 df = self.df[ list(viewpair) ]     # get view
                 df = df[mySlice]           # get slice of the data requested
-                dfList.append(df)
+                """Now, pass data through transforms"""
+                newDF = self.doTransforms(df)
+                #newDFlist = self.doFits(dfList)
+                """Store result for return"""
+                dfList.append(newDF)
             return dfList
         else:
             raise Exception('DataAnalyser window type ' + self.windowType + ' not implemented')
+
+    def doTransforms(self, df):
+        """Run all active transforms on the given DataFrame"""
+        newDF = df
+        for transName in self.__transforms.keys():
+            transConfig = self.__transforms[transName]
+            if not transConfig['Enabled']:
+                continue
+            debug("Running transformation type: "+str(transName))
+            transFunc = transConfig['func']
+            newDF = transFunc(newDF, **transConfig)
+        return newDF
 
     def get2DData(self) :
         if not self.isLoaded :

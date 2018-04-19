@@ -7,6 +7,7 @@ them out for easier analysis.
 #TODO quadratic fit
 #TODO linear fit
 #TODO angle transform
+#TODO multiple axis titles
 #TODO speed up update (without animation)
 #TODO filter data types
 #TODO save filters, named filters
