@@ -3,7 +3,9 @@
 Data Analyser Helper
 
 '''
+#TODO translation
 #TODO linear fit, view
+#TODO NavigationToolbar2TkAgg depricated
 #TODO scaling (unit conversion)
 #TODO interpret data types, allow filtering
 #TODO Fix doc strings
