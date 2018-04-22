@@ -59,8 +59,10 @@ def fixedTranslation(dfList, **kwargs) :
         for label,trans in zip(df.columns.unique().tolist(),[xshift,yshift]) :
             debug("Fixed Translation: label:{}, trans:{}".format(label,trans))
             newSeries = df[label] + trans
-            newSeriesList.append(df)
+            debug("Fixed Translation: new series: %s", newSeries.head())
+            newSeriesList.append(newSeries)
         newDF = pd.concat( newSeriesList, axis=1 ) 
+        debug("Fixed Translation: new DF: %s",newDF.head() )
         newDFlist.append(newDF)
     return newDFlist
 
@@ -379,16 +381,17 @@ class DataAnalyser(object):
             mySlice = slice(start,end)
             dfList = list()
             debug("currentView:"+ str(self.currentView))
+            """Make a list of DF Views to sent back to caller"""
             for viewpair in self.currentView :
                 """Create DF views to return to caller"""
                 df = self.df[ list(viewpair) ]      # make view
                 df = df[mySlice]                    # get slice of the data requested
                 dfList.append(df)
-            """Now, pass data through transforms"""
-            newDF = self.doTransforms(dfList)
-            """Now, pass data through fitter"""
+            """Now, pass all views through transforms"""
+            newDFlist = self.doTransforms(dfList)
+            """Now, pass all views through fitter"""
             #newDFlist = self.doFits(dfList)
-            return dfList
+            return newDFlist
         else:
             raise Exception('DataAnalyser window type ' + self.windowType + ' not implemented')
 
@@ -402,6 +405,7 @@ class DataAnalyser(object):
             debug("Running transformation type: "+str(transName))
             transFunc = transConfig['func']
             newDFlist = transFunc(newDFlist, **transConfig)
+            debug("Got tranformation back: %s", newDFlist[0].head())
         return newDFlist
 
     def get2DData(self) :
