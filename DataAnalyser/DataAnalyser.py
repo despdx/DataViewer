@@ -48,15 +48,21 @@ def _writeCSV(pandasDF, filename, *args, **kwargs) :
 def _writeHDF(pandasDF, filename, *args, **kwargs) :
     pandasDF.to_hdf(filename, *args, **kwargs)
 
-def fixedTransform(pandasDF, **kwargs) :
-    newDF = pandasDF.copy()
-    (x,y) = newDF.columns.tolist()
-    transformDict = {
-            x   : lambda x: x + kwargs['xTrans'],
-            y   : lambda y: y + kwargs['yTrans']
-            }
-    newDF = newDF.agg(transformDict)
-    return newDF
+def fixedTranslation(dfList, **kwargs) :
+    """Fixed translation function."""
+    newDFlist = list()
+    xshift = kwargs['xTrans']
+    yshift = kwargs['yTrans']
+    for df in dfList :
+        newSeriesList = list()
+        labelVsTrans = zip(df.columns.unique().tolist(),[xshift,yshift])
+        for label,trans in zip(df.columns.unique().tolist(),[xshift,yshift]) :
+            debug("Fixed Translation: label:{}, trans:{}".format(label,trans))
+            newSeries = df[label] + trans
+            newSeriesList.append(df)
+        newDF = pd.concat( newSeriesList, axis=1 ) 
+        newDFlist.append(newDF)
+    return newDFlist
 
 def fitLinear(pandasDF, **kwargs) :
     pass
@@ -108,8 +114,8 @@ class DataAnalyser(object):
                 'label'         : 'Fixed Translation Transform'
                 ,'xTrans'       : 0.0
                 ,'yTrans'       : 0.0
-                ,'Enabled'      : True
-                ,'func'         : fixedTransform
+                ,'Enabled'      : False
+                ,'func'         : fixedTranslation
                 }
             }
 
@@ -374,28 +380,29 @@ class DataAnalyser(object):
             dfList = list()
             debug("currentView:"+ str(self.currentView))
             for viewpair in self.currentView :
-                df = self.df[ list(viewpair) ]     # get view
-                df = df[mySlice]           # get slice of the data requested
-                """Now, pass data through transforms"""
-                newDF = self.doTransforms(df)
-                #newDFlist = self.doFits(dfList)
-                """Store result for return"""
-                dfList.append(newDF)
+                """Create DF views to return to caller"""
+                df = self.df[ list(viewpair) ]      # make view
+                df = df[mySlice]                    # get slice of the data requested
+                dfList.append(df)
+            """Now, pass data through transforms"""
+            newDF = self.doTransforms(dfList)
+            """Now, pass data through fitter"""
+            #newDFlist = self.doFits(dfList)
             return dfList
         else:
             raise Exception('DataAnalyser window type ' + self.windowType + ' not implemented')
 
-    def doTransforms(self, df):
+    def doTransforms(self, dfList):
         """Run all active transforms on the given DataFrame"""
-        newDF = df
+        newDFlist = dfList
         for transName in self.__transforms.keys():
             transConfig = self.__transforms[transName]
             if not transConfig['Enabled']:
                 continue
             debug("Running transformation type: "+str(transName))
             transFunc = transConfig['func']
-            newDF = transFunc(newDF, **transConfig)
-        return newDF
+            newDFlist = transFunc(newDFlist, **transConfig)
+        return newDFlist
 
     def get2DData(self) :
         if not self.isLoaded :
