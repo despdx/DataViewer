@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO off by one error in view size
 #TODO translation transform
 #TODO quadratic fit
 #TODO linear fit
@@ -515,13 +514,11 @@ class PageThree(tk.Frame):
 
     def setWindow(self, minVal=0, start=0, maxSize=10, size=10) :
         """ set the GUI values that correspond to the window """
-        #print("DEBUG: setWindow:"+str(minVal)
-        #        +", start:"+str(start)
-        #        +", maxSize:"+str(maxSize)
-        #        +", size"+str(size) )
-        self.dataWindowSizeWidget.config(from_=1, to=maxSize-start)
+        debug("DEBUG: setWindow: %s, start: %s, maxSize: %s, size: %s"
+                ,minVal, start, maxSize, size )
+        self.dataWindowSizeWidget.config(from_=1, to=maxSize-start+1)
         self.dataWindowSizeWidget.set(size)
-        self.dataWindowStartWidget.config(from_=minVal, to=maxSize-size)
+        self.dataWindowStartWidget.config(from_=minVal, to=maxSize-size+1)
         self.dataWindowStartWidget.set(start)
 
     def load(self, *args, **kwargs) :
