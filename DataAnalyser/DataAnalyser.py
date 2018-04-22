@@ -49,19 +49,22 @@ def _writeHDF(pandasDF, filename, *args, **kwargs) :
     pandasDF.to_hdf(filename, *args, **kwargs)
 
 def fixedTranslation(dfList, **kwargs) :
-    """Fixed translation function."""
+    """Fixed Translation: apply a fixed two-coordinate translation to all views."""
     newDFlist = list()
-    xshift = kwargs['xTrans']
-    yshift = kwargs['yTrans']
+    xshift = kwargs['xTrans']                   # x translation value
+    yshift = kwargs['yTrans']                   # y translation value
     for df in dfList :
         newSeriesList = list()
+        """Make a list of column,translation pairs to apply later.  Assumes
+        that first column is 'x' and second column is 'y'."""
         labelVsTrans = zip(df.columns.unique().tolist(),[xshift,yshift])
-        for label,trans in zip(df.columns.unique().tolist(),[xshift,yshift]) :
+        for label,trans in labelVsTrans :
+            """For each set of column name and translation value..."""
             #debug("Fixed Translation: label:{}, trans:{}".format(label,trans))
-            newSeries = df[label] + trans
+            newSeries = df[label] + trans                   # Apply translation
             #debug("Fixed Translation: new series: %s", newSeries.head())
-            newSeriesList.append(newSeries)
-        newDF = pd.concat( newSeriesList, axis=1 ) 
+            newSeriesList.append(newSeries)                 # Store it
+        newDF = pd.concat( newSeriesList, axis=1 )          # rebuild DF from both translated series
         #debug("Fixed Translation: new DF: %s",newDF.head() )
         newDFlist.append(newDF)
     return newDFlist
