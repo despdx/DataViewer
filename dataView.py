@@ -7,7 +7,8 @@ them out for easier analysis.
 #TODO translation transform
 #TODO quadratic fit
 #TODO linear fit
-#TODO why update runs twice
+#TODO why update runs twice: cause button release and button motion both call it?
+#TODO refactor logger, subclass LogRecord, speed improvement
 #TODO angle transform
 #TODO multiple axis titles
 #TODO speed up update (without animation)
