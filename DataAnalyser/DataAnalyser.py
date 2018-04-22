@@ -57,12 +57,12 @@ def fixedTranslation(dfList, **kwargs) :
         newSeriesList = list()
         labelVsTrans = zip(df.columns.unique().tolist(),[xshift,yshift])
         for label,trans in zip(df.columns.unique().tolist(),[xshift,yshift]) :
-            debug("Fixed Translation: label:{}, trans:{}".format(label,trans))
+            #debug("Fixed Translation: label:{}, trans:{}".format(label,trans))
             newSeries = df[label] + trans
-            debug("Fixed Translation: new series: %s", newSeries.head())
+            #debug("Fixed Translation: new series: %s", newSeries.head())
             newSeriesList.append(newSeries)
         newDF = pd.concat( newSeriesList, axis=1 ) 
-        debug("Fixed Translation: new DF: %s",newDF.head() )
+        #debug("Fixed Translation: new DF: %s",newDF.head() )
         newDFlist.append(newDF)
     return newDFlist
 
@@ -398,6 +398,7 @@ class DataAnalyser(object):
     def doTransforms(self, dfList):
         """Run all active transforms on the given DataFrame"""
         newDFlist = dfList
+        #debug("doTransforms: available transforms: %s" , self.__transforms.keys())
         for transName in self.__transforms.keys():
             transConfig = self.__transforms[transName]
             if not transConfig['Enabled']:
@@ -405,7 +406,7 @@ class DataAnalyser(object):
             debug("Running transformation type: "+str(transName))
             transFunc = transConfig['func']
             newDFlist = transFunc(newDFlist, **transConfig)
-            debug("Got tranformation back: %s", newDFlist[0].head())
+            #debug("Got tranformation back: %s", newDFlist[0].head())
         return newDFlist
 
     def get2DData(self) :
