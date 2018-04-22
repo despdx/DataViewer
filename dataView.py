@@ -3,9 +3,11 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
+#TODO off by one error in view size
 #TODO translation transform
 #TODO quadratic fit
 #TODO linear fit
+#TODO why update runs twice
 #TODO angle transform
 #TODO multiple axis titles
 #TODO speed up update (without animation)
