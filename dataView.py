@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO translation transform
 #TODO quadratic fit
 #TODO linear fit
 #TODO why update runs twice: cause button release and button motion both call it?
