@@ -403,10 +403,11 @@ class DataAnalyser(object):
             transConfig = self.__transforms[transName]
             if not transConfig['Enabled']:
                 continue
-            debug("Running transformation type: "+str(transName))
+            debug("Running transformation type: %s", transName)
             transFunc = transConfig['func']
+            debug("Transformation Config: %s", transConfig)
             newDFlist = transFunc(newDFlist, **transConfig)
-            #debug("Got tranformation back: %s", newDFlist[0].head())
+            #debug("Got transformation back: %s", newDFlist[0].head())
         return newDFlist
 
     def get2DData(self) :

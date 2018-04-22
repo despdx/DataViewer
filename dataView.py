@@ -135,13 +135,14 @@ class DataViewApp(tk.Tk):
         """Transform Menu"""
         self.transformMenu = tk.Menu(menubar, tearoff=0)            #create a menu
         self.transformOpts = self.DA.getTransformOptions()          #get dict of transforms from DA
-        self.transformConfig = dict()
         for key in self.transformOpts.keys():
             """Each key is a different transform capability.  Add a menu entry
             for it, and make the action to launch a dialog box. """
-            self.transformMenu.add_command(label=key
+            transformConfig = self.transformOpts[key]
+            transName = transformConfig['label']
+            self.transformMenu.add_command(label=transName
                 ,command=lambda: self.launchDialog(
-                    DVdialog, self, self.transformConfig, **self.transformOpts[key]
+                    DVdialog, self, transformConfig, **transformConfig
                     )
                 )
         menubar.add_cascade( label="Transform", menu=self.transformMenu)    #Finally, add new menu to main menubar
@@ -626,9 +627,9 @@ class PageThree(tk.Frame):
         DA.setView( viewList=newViewList, windowStart=newWinStart, windowSize=newWinSize,
                 windowType='index' )
 
+        """Redraw the plot"""
         dfList = self.DA.getViewData()
         #print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
-        """Redraw the plot"""
         self.ax.clear()
         (xlabel, ylabel) = ('','')
         for df in dfList :
@@ -736,6 +737,7 @@ class DVdialog:
         self.entryWidgetDict = dict()
         label=kwargs['label']
         tk.Label(top, text=label).pack()
+        self.restoreValFunc = dict()
 
         #self.e = tk.Entry(top)
         #self.e.pack(padx=5)
@@ -755,25 +757,48 @@ class DVdialog:
                     checkBoxFrame= LabelCheckFrame(self.top,currentValue)
                     checkBoxFrame.pack()
                     self.entryWidgetDict[key] = checkBoxFrame
+                    self.restoreValFunc[key] = self.toBool
                 elif isinstance(currentValue, (Number, str)) :
                     """Number or string value; use entry widget."""
                     entryFrame = LabelEntryFrame(self.top, key, kwargs[key])
                     entryFrame.pack()
                     self.entryWidgetDict[key] = entryFrame
+                    self.restoreValFunc[key] = self.toNumber
                 elif isinstance(currentValue,(list,tuple)):
                     """List value; use option list."""
                     optListFrame = labelSelWidgetFrame(self.top,label=key)
                     optListFrame.pack()
                     self.entryWidgetDict[key] = optListFrame
+                    self.restoreValFunc[key] = self.toString
                 else :
                     error("Cannot make widget for variable type: {}".format(currentValue))
+
+    def toBool(self, element):
+        """Enterpret the current value of the widget as a boolean"""
+        return bool(element.get())
+
+    def toNumber(self, element):
+        """Enterpret the current value of the widget as a number"""
+        return float(element.get())
+
+    def toList(self, element):
+        """Enterpret the current value of the widget as a list"""
+        return list(element.get())
+
+    def toString(self, element):
+        """Enterpret the current value of the widget as a string"""
+        return str(element.get())
 
     def _extractEntryValues(self):
         """Go through all entry widgets, get new values, store in return
         dictionary provided by caller"""
         for key in self.entryWidgetDict.keys():
             e = self.entryWidgetDict[key]
-            self.retDict[key] = e.get()
+            func = self.restoreValFunc[key]
+            newVal = func(e)
+            self.retDict[key] = newVal
+            debug("DVDialog: setting %s=%s", key, newVal)
+        debug("DVDialog: retDict: %s", self.retDict)
 
     def ok(self):
         self._extractEntryValues()
