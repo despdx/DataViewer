@@ -69,6 +69,30 @@ def fixedTranslation(dfList, **kwargs) :
         newDFlist.append(newDF)
     return newDFlist
 
+def viewCenteredTranslation(dfList, **kwargs) :
+    """View-Centered Translation: takes the first view (DF) and applies its
+    values as the translation calcuation to all other views.
+    """
+    newDFlist = list()
+    if len(dfList) < 2 :
+        """If there is only one view, don't do anything."""
+        newDFlist = dfList
+    else :
+        """Use first DF as translation"""
+        transDF = dfList[0]
+        transDFcols = transDF.columns           # save transDF axis 1
+        transDF.columns = ['x','y']             # normalize DF axis 1
+        debug("VCT: Head of transDF: %s" , transDF.head())
+        for df in dfList:
+            oldCols = df.columns                # save old columns
+            df.columns = ['x','y']              # normalize columns
+            newDF =  df - transDF               # translate each DF
+            debug("VCT: Head of newDF: %s", newDF.head())
+            newDF.columns = oldCols             # restore columns
+            newDFlist.append( newDF )           # store
+
+    return newDFlist
+
 def fitLinear(pandasDF, **kwargs) :
     pass
 
@@ -121,6 +145,11 @@ class DataAnalyser(object):
                 ,'yTrans'       : 0.0
                 ,'Enabled'      : False
                 ,'func'         : fixedTranslation
+                }
+            ,'tagcentered'  : {
+                'label'         : 'Active View-Centered Translation'
+                ,'Enabled'      : False
+                ,'func'         : viewCenteredTranslation
                 }
             }
 
