@@ -3,7 +3,7 @@
 Data Analyser Helper
 
 '''
-#TODO translation
+#TODO angle transform
 #TODO linear fit, view
 #TODO NavigationToolbar2TkAgg depricated
 #TODO scaling (unit conversion)
