@@ -93,6 +93,34 @@ def viewCenteredTranslation(dfList, **kwargs) :
 
     return newDFlist
 
+def unitVector(vector):
+    return vector / np.linalg.norm(vector)
+
+def calcAngleBtwnVectors(v1,v2):
+    uv1 = unitVector(v1)
+    uv2 = unitVector(v2)
+    dotProd = np.dot(uv1,uv2)
+    if dotProd == 0 :
+        return 0.0
+    return np.arccos(dotProd)
+
+def angleOfVector(vector):
+    return calcAngleBtwnVectors( (1.,0.),vector)
+
+def angleTransform(dfList, **kwargs):
+    """Compute the angle of all views treating each as a vector.
+    """
+
+    newDFlist = list()
+    for dfV in dfList :
+        angleA = np.vectorize(angleOfVector)(dfV['x'],dfV['y'])
+        seriesAngle = pd.Series(angleA, name='x')
+        seriesZero = pd.Series(np.zeros_like(angleA), name='y')
+        newDF = pd.DataFrame(seriesZero, angleA)
+        newDFlist.append(newDF)
+
+    return newDFlist
+
 def fitLinear(pandasDF, **kwargs) :
     pass
 
