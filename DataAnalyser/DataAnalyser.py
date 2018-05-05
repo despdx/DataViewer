@@ -107,6 +107,9 @@ def calcAngleBtwnVectors(v1,v2):
 def angleOfVector(vector):
     return calcAngleBtwnVectors( (1.,0.),vector)
 
+def angleOfVectorXY(x,y):
+    return angleOfVector((x,y))
+
 def angleTransform(dfList, **kwargs):
     """Compute the angle of all views treating each as a vector.
     """
@@ -114,12 +117,14 @@ def angleTransform(dfList, **kwargs):
     newDFlist = list()
     for dfV in dfList :
         cols = dfV.columns                      # save column names
-        dfV.columns = ['x','y']                 # normalize DF axis 1
-        angleA = np.vectorize(angleOfVector)(dfV['x'],dfV['y'])
-        seriesAngle = pd.Series(angleA, name='x')
-        seriesZero = pd.Series(np.zeros_like(angleA), name='y')
+        #dfV.columns = ['x','y']                 # normalize DF axis 1
+        #angleA = np.vectorize(angleOfVectorXY)(dfV['x'],dfV['y'])
+        angleA = dfV.apply(angleOfVector,axis=1, raw=True)
+        #seriesAngle = pd.Series(angleA, name='x')
+        #seriesZero = pd.Series(np.zeros_like(angleA), name='y')
         """Build new DF to return, with restored column names"""
-        newDF = pd.DataFrame(seriesZero, angleA, columns=columns)
+        newDict = { cols[0] : angleA, cols[1] : np.zeros_like(angleA) }
+        newDF = pd.DataFrame(newDict)
         newDFlist.append(newDF)
 
     return newDFlist
