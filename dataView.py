@@ -142,7 +142,7 @@ class DataViewApp(tk.Tk):
             transformConfig = self.transformOpts[key]
             transName = transformConfig['label']
             debug("Adding menu entry for translation %s:%s" % (key,transName))
-            newBox = DVdialogHelper(self, transformConfig, **transformConfig)
+            newBox = DVdialogHelper(self, transformConfig)
             self.transformMenu.add_command(label=transName,command=newBox.launch)
         menubar.add_cascade( label="Transform", menu=self.transformMenu)    #Finally, add new menu to main menubar
 
@@ -733,21 +733,20 @@ class DVdialogHelper:
     it's needed/used.  When you want to pop it up, call the .launch method.
     """
 
-    def __init__(self, parent, returnDict, **kwargs):
+    def __init__(self, parent, returnDict):
         debug("Createing new DVdialog")
         self.parent = parent
         self.retDict = returnDict
+        self.label=returnDict['label']
         self.entryWidgetDict = dict()
-        self.label=kwargs['label']
         self.restoreValFunc = dict()
-        self.kwargs = kwargs
 
     def launch(self, **kwargs):
         """Create window"""
         top = self.top = tk.Toplevel(self.parent)
         tk.Label(top, text=self.label).pack()
         """Create most elements of the dialog from kwargs"""
-        self._buildEntryWidgets(**self.kwargs)
+        self._buildEntryWidgets(**self.retDict)
         """Show all the elements created before"""
         for key in self.entryWidgetDict.keys():
             self.entryWidgetDict[key].pack()
