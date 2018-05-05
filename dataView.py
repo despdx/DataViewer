@@ -141,11 +141,9 @@ class DataViewApp(tk.Tk):
             for it, and make the action to launch a dialog box. """
             transformConfig = self.transformOpts[key]
             transName = transformConfig['label']
-            self.transformMenu.add_command(label=transName
-                ,command=lambda: self.launchDialog(
-                    DVdialog, self, transformConfig, **transformConfig
-                    )
-                )
+            debug("Adding menu entry for translation %s:%s" % (key,transName))
+            newBox = DVdialogHelper(self, transformConfig, **transformConfig)
+            self.transformMenu.add_command(label=transName,command=newBox.launch)
         menubar.add_cascade( label="Transform", menu=self.transformMenu)    #Finally, add new menu to main menubar
 
         """Curve Fit Menu"""
@@ -730,20 +728,30 @@ class LabelCheckFrame(tk.Frame):
         self.checkBoxW.deselect()
 
 
-class DVdialog:
+class DVdialogHelper:
+    """Helper class for tkinter dialog boxes.  This class is safe to create before
+    it's needed/used.  When you want to pop it up, call the .launch method.
+    """
+
     def __init__(self, parent, returnDict, **kwargs):
+        debug("Createing new DVdialog")
         self.parent = parent
-        top = self.top = tk.Toplevel(parent)
         self.retDict = returnDict
         self.entryWidgetDict = dict()
-        label=kwargs['label']
-        tk.Label(top, text=label).pack()
+        self.label=kwargs['label']
         self.restoreValFunc = dict()
+        self.kwargs = kwargs
 
-        #self.e = tk.Entry(top)
-        #self.e.pack(padx=5)
-        self._buildEntryWidgets(**kwargs)
-
+    def launch(self, **kwargs):
+        """Create window"""
+        top = self.top = tk.Toplevel(self.parent)
+        tk.Label(top, text=self.label).pack()
+        """Create most elements of the dialog from kwargs"""
+        self._buildEntryWidgets(**self.kwargs)
+        """Show all the elements created before"""
+        for key in self.entryWidgetDict.keys():
+            self.entryWidgetDict[key].pack()
+        """Finally, add button"""
         b = tk.Button(top, text="OK", command=self.ok)
         b.pack(pady=5)
 
@@ -756,19 +764,16 @@ class DVdialog:
                 if isinstance(currentValue, bool) :
                     """Boolean value; use check box widget."""
                     checkBoxFrame= LabelCheckFrame(self.top,currentValue)
-                    checkBoxFrame.pack()
                     self.entryWidgetDict[key] = checkBoxFrame
                     self.restoreValFunc[key] = self.toBool
                 elif isinstance(currentValue, (Number, str)) :
                     """Number or string value; use entry widget."""
                     entryFrame = LabelEntryFrame(self.top, key, kwargs[key])
-                    entryFrame.pack()
                     self.entryWidgetDict[key] = entryFrame
                     self.restoreValFunc[key] = self.toNumber
                 elif isinstance(currentValue,(list,tuple)):
                     """List value; use option list."""
                     optListFrame = labelSelWidgetFrame(self.top,label=key)
-                    optListFrame.pack()
                     self.entryWidgetDict[key] = optListFrame
                     self.restoreValFunc[key] = self.toString
                 else :
@@ -798,8 +803,8 @@ class DVdialog:
             func = self.restoreValFunc[key]
             newVal = func(e)
             self.retDict[key] = newVal
-            debug("DVDialog: setting %s=%s", key, newVal)
-        debug("DVDialog: retDict: %s", self.retDict)
+            debug("DVdialog: setting %s=%s", key, newVal)
+        debug("DVdialog: retDict: %s", self.retDict)
 
     def ok(self):
         self._extractEntryValues()
