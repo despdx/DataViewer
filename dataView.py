@@ -3,12 +3,13 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
+#TODO angle transform
 #TODO quadratic fit
 #TODO linear fit
+#TODO allow transform to change view axis titles
+#TODO multiple axis titles
 #TODO why update runs twice: cause button release and button motion both call it?
 #TODO refactor logger, subclass LogRecord, speed improvement
-#TODO angle transform
-#TODO multiple axis titles
 #TODO speed up update (without animation)
 #TODO filter data types
 #TODO save filters, named filters
@@ -19,6 +20,7 @@ them out for easier analysis.
 #TODO WIP Alternate indexes, need to be able to change scales first
 #TODO animation
 #TODO fix doc strings
+#TODO transform/fit descriptions
 #TODO start on start frame, show PageThree after load
 #TODO better window and view widget layouts
 #TODO use pymagic to detect file types
