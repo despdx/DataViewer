@@ -3,11 +3,10 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO angle transform
+#TODO multiple axis titles
 #TODO quadratic fit
 #TODO linear fit
 #TODO allow transform to change view axis titles
-#TODO multiple axis titles
 #TODO why update runs twice: cause button release and button motion both call it?
 #TODO refactor logger, subclass LogRecord, speed improvement
 #TODO speed up update (without animation)
