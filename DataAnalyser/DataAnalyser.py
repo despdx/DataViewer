@@ -123,7 +123,7 @@ def angleTransform(dfList, **kwargs):
         #seriesAngle = pd.Series(angleA, name='x')
         #seriesZero = pd.Series(np.zeros_like(angleA), name='y')
         """Build new DF to return, with restored column names"""
-        newDict = { cols[0] : angleA, cols[1] : np.zeros_like(angleA) }
+        newDict = { cols[0] : angleA, cols[1] : np.arange(0.,1.,1./angleA.size) }
         newDF = pd.DataFrame(newDict)
         newDFlist.append(newDF)
 
