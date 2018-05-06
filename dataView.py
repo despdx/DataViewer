@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO bug some labels are wrong
 #TODO quadratic fit
 #TODO linear fit
 #TODO allow transform to change view axis titles

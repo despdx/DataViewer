@@ -78,10 +78,8 @@ def viewCenteredTranslation(dfList, **kwargs) :
         """If there is only one view, don't do anything."""
         newDFlist = dfList
     else :
-        """Use first DF as translation"""
+        """Use first DF as reference for translation"""
         transDF = dfList[0]
-        transDFcols = transDF.columns           # save transDF axis 1
-        transDF.columns = ['x','y']             # normalize DF axis 1
         debug("VCT: Head of transDF: %s" , transDF.head())
         for df in dfList:
             oldCols = df.columns                # save old columns
