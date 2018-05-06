@@ -15,6 +15,8 @@ them out for easier analysis.
 #TODO disable chop button until loaded
 #TODO error when cancelling load
 #TODO scale scales
+#TODO LaTeX plots
+#TODO My own plot style
 #TODO WIP Alternate indexes, need to be able to change scales first
 #TODO animation
 #TODO fix doc strings
