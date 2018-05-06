@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO multiple axis titles
 #TODO quadratic fit
 #TODO linear fit
 #TODO allow transform to change view axis titles
@@ -628,14 +627,21 @@ class PageThree(tk.Frame):
         """Redraw the plot"""
         dfList = self.DA.getViewData()
         #print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
-        self.ax.clear()
-        (xlabel, ylabel) = ('','')
+        ax = self.ax
+        ax.clear()
         for df in dfList :
             """draw all df data as x,y data"""
             (xlabel, ylabel) = df.columns.tolist()
-            self.ax.plot(df[xlabel].values, df[ylabel].values, 'o-')
-        self.ax.set_xlabel(xlabel)
-        self.ax.set_ylabel(ylabel)
+            ax.plot(df[xlabel].values, df[ylabel].values, 'o-')
+            oldXlabel = ax.get_xlabel()
+            if oldXlabel :
+                """Old label is not empty"""
+                ax.set_xlabel(oldXlabel + '\n' +xlabel)
+                ax.set_ylabel(ax.get_ylabel() + '\n' +ylabel)
+            else :
+                """Old lable is empty"""
+                ax.set_xlabel(xlabel)
+                ax.set_ylabel(ylabel)
         self.fig.canvas.draw()
 
         """ Show Statistics """
