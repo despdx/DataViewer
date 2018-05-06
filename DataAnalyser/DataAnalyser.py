@@ -117,11 +117,7 @@ def angleTransform(dfList, **kwargs):
     newDFlist = list()
     for dfV in dfList :
         cols = dfV.columns                      # save column names
-        #dfV.columns = ['x','y']                 # normalize DF axis 1
-        #angleA = np.vectorize(angleOfVectorXY)(dfV['x'],dfV['y'])
         angleA = dfV.apply(angleOfVector,axis=1, raw=True)
-        #seriesAngle = pd.Series(angleA, name='x')
-        #seriesZero = pd.Series(np.zeros_like(angleA), name='y')
         """Build new DF to return, with restored column names"""
         newDict = { cols[0] : angleA, cols[1] : np.arange(0.,1.,1./angleA.size) }
         newDF = pd.DataFrame(newDict)
