@@ -187,6 +187,11 @@ class DataAnalyser(object):
                 ,'Enabled'      : False
                 ,'func'         : viewCenteredTranslation
                 }
+            ,'angle'        : {
+                'label'         : 'Active Angle Translation'
+                ,'Enabled'      : False
+                ,'func'         : angleTransform
+                }
             }
 
     """ Curve Fit Options """
