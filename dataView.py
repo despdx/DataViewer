@@ -3,6 +3,7 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
+#TODO chop exports current view in addition to full dataset
 #TODO quadratic fit
 #TODO linear fit
 #TODO WIP allow transform to change view axis titles.  Actually, this already works
