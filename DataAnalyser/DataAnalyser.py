@@ -117,7 +117,7 @@ def angleTransform(dfList, **kwargs):
         cols = dfV.columns                      # save column names
         angleA = dfV.apply(angleOfVector,axis=1, raw=True)
         """Build new DF to return, with restored column names"""
-        newDict = { cols[0] : angleA, cols[1] : np.arange(0.,1.,1./angleA.size) }
+        newDict = { 'displacement angle (rad)' : angleA, 'time (ordinal)': np.arange(0.,angleA.size,1.) }
         newDF = pd.DataFrame(newDict)
         newDFlist.append(newDF)
 

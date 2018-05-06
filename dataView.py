@@ -5,7 +5,7 @@ them out for easier analysis.
 """
 #TODO quadratic fit
 #TODO linear fit
-#TODO allow transform to change view axis titles
+#TODO WIP allow transform to change view axis titles.  Actually, this already works
 #TODO why update runs twice: cause button release and button motion both call it?
 #TODO refactor logger, subclass LogRecord, speed improvement
 #TODO speed up update (without animation)
