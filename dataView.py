@@ -556,8 +556,10 @@ class PageThree(tk.Frame):
         name = filedialog.askopenfilename()
         self.loadFileData(path=name, *args, **kwargs)
 
-    def loadFileData(self, *args, path=None, **kwargs) :
+    def loadFileData(self, path=None, *args, **kwargs) :
         """ Show a dialog to select a file and load it.  """
+        if path is None:
+            raise TypeError("loadFileData: path option is required")
         print("Got filename:" +path)
         loadData(path, *args, **kwargs)
         self.postLoad()
