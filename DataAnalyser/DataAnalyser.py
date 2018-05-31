@@ -259,7 +259,7 @@ class DataAnalyser(object):
     def getConfig(self) :
         return self.__config.getConfig()
 
-    def load(self, *args, filetype='csv', filename=None, **kwargs):
+    def load(self, filetype='csv', filename=None, *args, **kwargs):
         """ Determine which file to load """
         if filename == None :
             raise Exception('No filename provided.')
