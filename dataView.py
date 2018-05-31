@@ -3,6 +3,7 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
+#TODO user defined labels
 #TODO chop exports current view in addition to full dataset
 #TODO user defined plot scale/axes
 #TODO quadratic fit
@@ -75,6 +76,14 @@ configDefault = {
             'default'   : 1.0
             ,'func'      : lambda x: isinstance(x,float)
             }
+        ,'xlabel'       : {
+            'default'   : None
+            ,'func'     : lambda x: (x is None) or isinstance(x,str)
+            }
+        ,'ylabel'       : {
+            'default'   : None
+            ,'func'     : lambda x: (x is None) or isinstance(x,str)
+            }
         ,'chopOpts'     : {
             'default'   : {
                 'fmt'       : 'csv'
@@ -127,6 +136,7 @@ class DataViewApp(tk.Tk):
         """ build a menu bar """
         menubar = tk.Menu(container)
         self.menubar = menubar
+
         """Create file menu"""
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save settings", command=lambda: popupmsg('Not supported just yet!'))
@@ -134,6 +144,9 @@ class DataViewApp(tk.Tk):
         filemenu.add_command(label="Exit", command=quit)
         menubar.add_cascade(label="File", menu=filemenu)
         self.filemenu = filemenu
+
+        """Create Settings Menu"""
+        self.addSettingsMenu()
 
         """Transform Menu"""
         self.transformMenu = tk.Menu(menubar, tearoff=0)            #create a menu
@@ -149,8 +162,7 @@ class DataViewApp(tk.Tk):
         menubar.add_cascade( label="Transform", menu=self.transformMenu)    #Finally, add new menu to main menubar
 
         """Curve Fit Menu"""
-        self.fitMenu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Curve Fit", menu=self.fitMenu)
+        self.addCurveFitMenu()
 
         """ Finish Menu bar """
         tk.Tk.config(self,menu=menubar)
@@ -169,6 +181,19 @@ class DataViewApp(tk.Tk):
 
         """ Show the starting frame type on init """
         self.show_frame(PageThree)
+
+    def addSettingsMenu(self):
+        """Curve Fit Menu"""
+        menubar = self.menubar
+        self.settingsMenu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Settings", menu=self.settingsMenu)
+
+    def addCurveFitMenu(self):
+        """Curve Fit Menu"""
+        menubar = self.menubar
+        self.fitMenu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Curve Fit", menu=self.fitMenu)
+
 
     def launchDialog(self, dialogClass, parentForDialog, returnDict, **initDict):
         """Launch a dialog box and wait for it.
