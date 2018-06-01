@@ -3,7 +3,7 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO user defined labels
+#TODO Bug in phase calculation
 #TODO chop exports current view in addition to full dataset
 #TODO user defined plot scale/axes
 #TODO quadratic fit
@@ -23,6 +23,8 @@ them out for easier analysis.
 #TODO WIP Alternate indexes, need to be able to change scales first
 #TODO animation
 #TODO fix doc strings
+#TODO implement settings menu
+#TODO save settings
 #TODO transform/fit descriptions
 #TODO start on start frame, show PageThree after load
 #TODO better window and view widget layouts
