@@ -660,19 +660,36 @@ class PageThree(tk.Frame):
         #print("DEBUG: updateEvent: got updated data:", df.colums.tolist())
         ax = self.ax
         ax.clear()
+        xlabelList, ylabelList = list(), list()
         for df in dfList :
             """draw all df data as x,y data"""
             (xlabel, ylabel) = df.columns.tolist()
             ax.plot(df[xlabel].values, df[ylabel].values, 'o-')
-            oldXlabel = ax.get_xlabel()
-            if oldXlabel :
-                """Old label is not empty"""
-                ax.set_xlabel(oldXlabel + '\n' +xlabel)
-                ax.set_ylabel(ax.get_ylabel() + '\n' +ylabel)
-            else :
-                """Old lable is empty"""
-                ax.set_xlabel(xlabel)
-                ax.set_ylabel(ylabel)
+            """store labels"""
+            xlabelList.append(xlabel)
+            ylabelList.append(ylabel)
+
+        """Set labels"""
+        newXlabel, newYlabel = str(), str()
+        xlabelOverride = self.DVconfig.get('xlabel')
+        ylabelOverride = self.DVconfig.get('ylabel')
+        """Remember, configer doesn't hold native objects"""
+        debug("Plotting: xlabelOverride: %s" % xlabelOverride)
+        debug("Plotting: xlabelOverride eq None: %s" % (xlabelOverride == None))
+        if (xlabelOverride == None) or (ylabelOverride == None) :
+            """Write the labels for all data"""
+            debug("Plotting: Label overrides OFF")
+            sep = "\n"
+            newXlabel = sep.join( xlabelList )
+            newYlabel = sep.join( ylabelList )
+            debug("new xlabel: %s" % newXlabel)
+        else :
+            """the labels"""
+            debug("Plotting: Label overrides ON")
+            newXlabel = xlabelOverride
+            newYlabel = ylabelOverride
+        ax.set_xlabel(newXlabel)
+        ax.set_ylabel(newYlabel)
         self.fig.canvas.draw()
 
         """ Show Statistics """
