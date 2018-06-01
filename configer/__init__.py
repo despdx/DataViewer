@@ -32,7 +32,7 @@ class Configer(object):
             default: a dict of dicts.  The key is the name of the configuration
                 object to be used later.  The value is another dict containing
                 the following keys: 'default', 'func'.  The value of key 'default'
-                is the current and default value for this configuration.  The
+                is the initial and default value for this configuration.  The
                 value of the key 'func' is a function that validates the value.
 
         Returns: An initialized Configer object.
@@ -127,3 +127,16 @@ class _ConfAtom(object):
 
     def next(self) :
         self.__next__()
+
+    def __nonzero__(self):
+        if isinstance(self.__ca, bool) :
+            return self.__ca
+        elif isinstance(self.__ca, str) :
+            return self.__ca.__len__
+        elif isinstance(self.__ca, int) :
+            return self.__ca
+        else :
+            return False
+
+    def __eq__(self,other):
+        return self.__ca.__eq__(other)
