@@ -80,6 +80,7 @@ configDefault = {
             }
         ,'xlabel'       : {
             'default'   : None
+            #'default'   : "Position X (mm)"
             ,'func'     : lambda x: (x is None) or isinstance(x,str)
             }
         ,'ylabel'       : {
