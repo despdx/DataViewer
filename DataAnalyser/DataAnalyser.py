@@ -115,7 +115,7 @@ def angleTransform(dfList, **kwargs):
     newDFlist = list()
     for dfV in dfList :
         cols = dfV.columns                      # save column names
-        angleA = dfV.apply(angleOfVector,axis=1, raw=True)
+        angleA = np.arctan2( dfV.iloc[:,0], dfV.iloc[:,1] )
         """Build new DF to return, with restored column names"""
         newDict = { 'displacement angle (rad)' : angleA, 'time (ordinal)': np.arange(0.,angleA.size,1.) }
         newDF = pd.DataFrame(newDict)
