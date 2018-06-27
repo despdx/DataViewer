@@ -3,6 +3,7 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
+#TODO show filename somewhere
 #TODO Bug in phase calculation
 #TODO chop exports current view in addition to full dataset
 #TODO user defined plot scale/axes
