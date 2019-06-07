@@ -37,7 +37,6 @@ them out for easier analysis.
 import matplotlib as mpl
 mpl.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvas
-from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar
 #from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
@@ -139,6 +138,8 @@ class DataViewApp(tk.Tk):
 
         """ build a menu bar """
         menubar = tk.Menu(container)
+        # A critical step, avoids need for toolbar object
+        self.config(menu=menubar)
         self.menubar = menubar
 
         """Create file menu"""
@@ -167,9 +168,6 @@ class DataViewApp(tk.Tk):
 
         """Curve Fit Menu"""
         self.addCurveFitMenu()
-
-        """ Finish Menu bar """
-        tk.Tk.config(self,menu=menubar)
 
         """ Make a dictionary of different frame types (classes) that
         we will use for the application.
@@ -514,8 +512,6 @@ class PageThree(tk.Frame):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-        toolbar = NavigationToolbar(self.canvas, self)
-        toolbar.update()
         self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def addChop(self) :
@@ -865,6 +861,10 @@ class DVdialogHelper:
     def ok(self):
         self._extractEntryValues()
         self.top.destroy()
+
+    def client_exit(self):
+        exit()
+
 
 def convertBack(strValue):
     """Take a value and try to convert it to the most restrictive data type.
