@@ -5,7 +5,6 @@ them out for easier analysis.
 """
 #TODO show filename somewhere
 #TODO find a way to write only one index
-#TODO disable auto stats output on STDOUT
 #TODO button to print stats to STDOUT
 #TODO chop exports current view in addition to full dataset
 #TODO user defined plot scale/axes
@@ -695,7 +694,7 @@ class PageThree(tk.Frame):
         self.fig.canvas.draw()
 
         """ Show Statistics """
-        self.showStats()
+        #self.showStats()
 
     def showStats(self):
         """ Get and report statsistics for the current view """
