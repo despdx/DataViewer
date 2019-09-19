@@ -3,9 +3,10 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
+#TODO button to print stats to STDOUT
+#TODO CDF stats
 #TODO show filename somewhere
 #TODO find a way to write only one index
-#TODO button to print stats to STDOUT
 #TODO chop exports current view in addition to full dataset
 #TODO user defined plot scale/axes
 #TODO quadratic fit
