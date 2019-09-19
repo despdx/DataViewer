@@ -484,6 +484,8 @@ class DataAnalyser(object):
 
     def chop(self, dirpath=pathlib.PurePath(os.path.curdir), fmt='csv'
             ,hdfKey='chop', prefix='chop', **kwargs) :
+        """ Cut out the current view and make a new file with those data points
+        """
         if not self.isLoaded :
             raise _DataNotLoaded("Data not loaded.")
         xMin, xMax = (self.windowStart, self.windowStart + self.windowSize)
