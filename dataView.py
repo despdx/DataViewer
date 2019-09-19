@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO button to print stats to STDOUT
 #TODO CDF stats
 #TODO show filename somewhere
 #TODO find a way to write only one index
@@ -439,6 +438,7 @@ class PageThree(tk.Frame):
         self.addDataWindow()    # Add widgets for setting data window
         self.addDataView()      # Add widgets for setting data view
         self.addChop()          # Add chop button
+        self.addStat()          # Add stat button
 
     def addDeactivateList(self, listLike) :
         """ Keep a list of deactivate-able widgets """
@@ -520,6 +520,11 @@ class PageThree(tk.Frame):
         chopBW = tk.Button(self, text="Chop", command=self.doChop)
         chopBW.pack()
         self.chopButtonW = chopBW
+
+    def addStat(self) :
+        statBW = tk.Button(self, text="Stats", command=self.doStat)
+        statBW.pack()
+        self.statButtonW = statBW
 
     def postLoad(self) :
         """ Things to run after loading a new DataAnalyser object.  """
@@ -710,6 +715,13 @@ class PageThree(tk.Frame):
         debug('chopConf:'+str(chopConf))
         debug('dict(chopConf):'+str(dict(chopConf)))
         self.DA.chop(dirpath=directory, **dict(chopConf))
+
+    def doStat(self) :
+        directory=pathlib.PurePath(os.path.curdir)
+        #chopConf = self.DVconfig.get('chopOpts')
+        #debug('chopConf:'+str(chopConf))
+        #debug('dict(chopConf):'+str(dict(chopConf)))
+        self.showStats()
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
