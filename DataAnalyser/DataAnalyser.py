@@ -517,6 +517,9 @@ class DataAnalyser(object):
             print(e)
 
     def getStats(self):
+        """ Show stats
+        """
+        #TODO make this just one result for all labels in all views
         dfList = self.getViewData()
         statList = list()
         for df in dfList :

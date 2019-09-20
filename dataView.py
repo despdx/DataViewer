@@ -34,6 +34,8 @@ them out for easier analysis.
 #TODO ? fix NotImplementedError class
 #TODO show summary statistics for view in GUI
 #TODO enabling disabled view should assume primary view
+#TODO mark percentile/quantile on CDF plot
+#TODO make doStat/getStats print only one set
 
 import matplotlib as mpl
 mpl.use("TkAgg")
@@ -46,6 +48,7 @@ style.use('ggplot')
 import os
 import pathlib
 from logging import *
+#basicConfig(level=DEBUG)
 basicConfig(level=ERROR)
 from warnings import warn as warnwarn
 from numbers import Number
