@@ -17,6 +17,7 @@ Data Analyser Helper
 #TODO GUI summary statistics
 #TODO allow index to beselected in main view
 #TODO Index Views
+#TODO Decide if stats should return list or not
 
 import pandas as pd
 import numpy as np
@@ -521,23 +522,38 @@ class DataAnalyser(object):
         """
         #TODO make this just one result for all labels in all views
         dfList = self.getViewData()
+        quantileTgtT = (.50,.683,.955,.997)
         statList = list()
         for df in dfList :
-            statList.append( df.describe() )
-        return statList
+            # Create a DF of statistics data by combining the describe nad quantile features of pandas DF
+            statDF = pd.concat( [df.describe(),df.quantile(quantileTgtT)] )
+            statList.append( statDF )
+        # pull off the first stat DF in the list
+        statDF = statList.pop(0)
+        for df in statList :
+            # mash them together into one DF for simpler output
+            newdf = statDF.T.append( df.T )
+            statDF = newdf.T
+        return [statDF]                                 #TODO need to return list for caller, could be changed
+
+    def getQuantiles(self) :
+        """ Returns: quantiles for all ordinate data series
+        """
+        num_bins = 100
+        quantileTgtT = (50,68.3,95.5,99.7)
+        qSer = pd.Series(quantileTgtT, name = 'Quantile')
+        ser = self.df[label]
 
     def getCDFforLabel(self, label) :
         """ Return CDF information
         """
         num_bins = 100
-        quantileTgtT = (50,68,95,100)
-        ser = self.df[label]
         winStart, winSize = self.getWindow()
         winSlice = slice(winStart, winStart + winSize)
+        ser = self.df[label]
         counts, bin_edges = np.histogram(ser[winSlice], bins=num_bins)
-        cdf = np.cumsum (counts)
-        quantileZip = zip(quantileTgtT,np.percentile(ser[winSlice],quantileTgtT))
-        return (label, cdf, counts, bin_edges, quantileZip)
+        cdf = np.cumsum(counts)
+        return (label, cdf, counts, bin_edges)
 
     def getCDFall(self) :
         """ Return data for CDF

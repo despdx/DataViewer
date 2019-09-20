@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO CDF stats
 #TODO show filename somewhere
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
@@ -729,11 +728,11 @@ class PageThree(tk.Frame):
         cdfInfoLst = self.DA.getCDFall()                        # get CDF info from DA
         for (i,cdfInfoT) in zip(range(len(cdfInfoLst)),cdfInfoLst) :
             fig = plt.figure()                                  # mk new fig
-            label, cdf, counts, bin_edges , quantileZip = cdfInfoT
-            for q,val in quantileZip :
-                print ("Label {}: {}%% percentile: {}".format (label, q,val))
+            label, cdf, counts, bin_edges = cdfInfoT
             plt.plot(bin_edges[1:], cdf/cdf[-1])
-            fig.savefig("plotCDF_{}.pdf".format(i))
+            plt.xlabel("{} values".format(label))
+            plt.ylabel("Normalized Cumulative Sum (CDF)".format())
+            fig.savefig("plotCDF_{},{}.pdf".format(i,label))
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
