@@ -610,7 +610,7 @@ class PageThree(tk.Frame):
         self.isSafeToUpdate = False
         self.viewList = viewList
         for view,subFrame in zip(viewList,self.dataViewSubFrameList) :
-            print("DEBUG: DataViewApp: setView: "+str(view))
+            debug("DataViewApp: setView: "+str(view))
             subFrame.disable()
             subFrame.setView(view)
             subFrame.enable()
@@ -717,11 +717,17 @@ class PageThree(tk.Frame):
         self.DA.chop(dirpath=directory, **dict(chopConf))
 
     def doStat(self) :
-        directory=pathlib.PurePath(os.path.curdir)
-        #chopConf = self.DVconfig.get('chopOpts')
-        #debug('chopConf:'+str(chopConf))
-        #debug('dict(chopConf):'+str(dict(chopConf)))
+        """ Do actions for "stats" button
+        """
+        # First, show stats on STDOUT
         self.showStats()
+        # Next, make a CDF plot for all the visible data
+        cdfInfoLst = self.DA.getCDFall()                        # get CDF info from DA
+        for (i,cdfInfoT) in zip(range(len(cdfInfoLst)),cdfInfoLst) :
+            fig = plt.figure()                                  # mk new fig
+            cdf, counts, bin_edges = cdfInfoT
+            plt.plot(bin_edges[1:], cdf/cdf[-1])
+            fig.savefig("plotCDF_{}.pdf".format(i))
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :

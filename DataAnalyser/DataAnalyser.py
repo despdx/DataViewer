@@ -515,6 +515,32 @@ class DataAnalyser(object):
             statList.append( df.describe() )
         return statList
 
+    def getCDFforLabel(self, label) :
+        """ Return CDF information
+        """
+        ser = self.df[label]
+        winStart, winSize = self.getWindow()
+        winSlice = slice(winStart, winStart + winSize)
+        num_bins = 100
+        counts, bin_edges = np.histogram(ser[winSlice], bins=num_bins, normed=True)
+        cdf = np.cumsum (counts)
+        #plt.plot (bin_edges[1:], cdf/cdf[-1])
+        return (cdf, counts, bin_edges)
+
+    def getCDFall(self) :
+        """ Return data for CDF
+        """
+        debug("getCDF: starting...")
+        cdfInfoLst = list()
+        for viewpair in self.currentView :
+            # for each "current view" of column/label pairs, do CDF of the ordinate
+            yLabel = viewpair[1] # ordinate
+            debug("getCDF: got ordinate label: {}".format(yLabel))
+            cdfInfoT = self.getCDFforLabel( yLabel )
+            debug("getCDF: got CDF data: {}".format(type(cdfInfoT)))
+            cdfInfoLst.append(cdfInfoT)
+        return cdfInfoLst
+
 class _DataNotLoaded(Exception) :
     """ Specialized error class for DataAnalyser
 
