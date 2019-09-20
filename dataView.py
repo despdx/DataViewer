@@ -726,13 +726,18 @@ class PageThree(tk.Frame):
         self.showStats()
         # Next, make a CDF plot for all the visible data
         cdfInfoLst = self.DA.getCDFall()                        # get CDF info from DA
-        for (i,cdfInfoT) in zip(range(len(cdfInfoLst)),cdfInfoLst) :
-            fig = plt.figure()                                  # mk new fig
+        #for (i,cdfInfoT) in zip(range(len(cdfInfoLst)),cdfInfoLst) :
+        for cdfInfoT in cdfInfoLst :
+            i = cdfInfoLst.index(cdfInfoT)
             label, cdf, counts, bin_edges = cdfInfoT
+            start,size = self.DA.getWindow()
+            end = start+size
+            filename = "plotCDF_{},{}-{},{}.pdf".format(label,start,end,i)
+            fig = plt.figure()                                  # mk new fig
             plt.plot(bin_edges[1:], cdf/cdf[-1])
             plt.xlabel("{} values".format(label))
             plt.ylabel("Normalized Cumulative Sum (CDF)".format())
-            fig.savefig("plotCDF_{},{}.pdf".format(i,label))
+            fig.savefig(filename)
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
