@@ -4,6 +4,30 @@ Why
 --------------
 Just a quick program to help me view some data files.
 
+Features
+--------
+- Import CSV data files.
+- Browse data in subsets, select the window you want to see.
+- "chop" only the records/rows for the data you are viewing out of the
+  original file and into a new file (CSV).  This lets you separate important
+  records from all the others, by visually identifying interesting features in
+  specific series/columns.
+- Browse the data as single series/column vs index, or plot two series against
+  each other.
+- Calculate summary statistics (STDOUT)
+- (New) Produce plot of Cumulative Distribution Function (CDF) (of vertical
+  axis data series) along with other statistics.
+
+Requirements
+-----------
+- tkiner
+- pandas
+- numpy
+- matplotlib
+- logging
+- warnings
+- Number
+
 ### Copyright 2018 Paul R. DeStefano
 >   This program is free software: you can redistribute it and/or modify
 >   it under the terms of the GNU General Public License as published by
