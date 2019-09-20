@@ -526,14 +526,15 @@ class DataAnalyser(object):
     def getCDFforLabel(self, label) :
         """ Return CDF information
         """
+        num_bins = 100
+        quantileTgtT = (50,68,95,100)
         ser = self.df[label]
         winStart, winSize = self.getWindow()
         winSlice = slice(winStart, winStart + winSize)
-        num_bins = 100
-        counts, bin_edges = np.histogram(ser[winSlice], bins=num_bins, normed=True)
+        counts, bin_edges = np.histogram(ser[winSlice], bins=num_bins)
         cdf = np.cumsum (counts)
-        #plt.plot (bin_edges[1:], cdf/cdf[-1])
-        return (cdf, counts, bin_edges)
+        quantileZip = zip(quantileTgtT,np.percentile(ser[winSlice],quantileTgtT))
+        return (label, cdf, counts, bin_edges, quantileZip)
 
     def getCDFall(self) :
         """ Return data for CDF
