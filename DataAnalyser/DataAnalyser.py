@@ -413,9 +413,13 @@ class DataAnalyser(object):
                     'min' : self.df.index.min() }
 
     def getView(self) :
+        """ Return the set of labels/parameters in current view
+        """
         return self.currentView
 
     def getViewLimits(self) :
+        """ Returns: min/max values for currently shown data, all view pairs
+        """
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: getWindowLimits: no data loaded")
         viewLimitDictList = list()
@@ -435,11 +439,15 @@ class DataAnalyser(object):
         self.windowSize = size
 
     def getWindow(self) :
+        """ Returns: window start and window size
+        """
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: getView: no data loaded")
         return ( self.windowStart , self.windowSize )
     
     def getViewData(self) :
+        """ Returns df of data in the current view
+        """
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: getViewData: no data loaded")
         if self.windowType == 'index' :
