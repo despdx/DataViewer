@@ -522,7 +522,7 @@ class DataAnalyser(object):
         """
         #TODO make this just one result for all labels in all views
         dfList = self.getViewData()
-        quantileTgtT = (.50,.683,.955,.997)
+        quantileTgtT = (.683,.955,.997)
         statList = list()
         for df in dfList :
             # Create a DF of statistics data by combining the describe nad quantile features of pandas DF
@@ -535,14 +535,6 @@ class DataAnalyser(object):
             newdf = statDF.T.append( df.T )
             statDF = newdf.T
         return [statDF]                                 #TODO need to return list for caller, could be changed
-
-    def getQuantiles(self) :
-        """ Returns: quantiles for all ordinate data series
-        """
-        num_bins = 100
-        quantileTgtT = (50,68.3,95.5,99.7)
-        qSer = pd.Series(quantileTgtT, name = 'Quantile')
-        ser = self.df[label]
 
     def getCDFforLabel(self, label) :
         """ Return CDF information
