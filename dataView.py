@@ -744,8 +744,8 @@ class PageThree(tk.Frame):
     def saveViewPlot(self) :
         fig = self.fig                                              # Get figure
         start,end = self.DA.getStartEnd()                           # Get view range
-        dirpath = self.DVconfig.get('savePlotDir').ca               # Get settings
-        prefix = self.DVconfig.get('savePlotPrefix').ca
+        dirpath = self.DVconfig.get('savePlotDir')
+        prefix = self.DVconfig.get('savePlotPrefix')
         filename = prefix + "_{start}-{end}".format(start=start,end=end) + ".pdf"
         pathname = os.path.join( dirpath , filename )
         plt.savefig(pathname)                                       # Save plot
@@ -759,8 +759,8 @@ class PageThree(tk.Frame):
         self.saveViewPlot()
         # Next, make a CDF plot for all the visible data
         cdfInfoLst = self.DA.getCDFall()                        # get CDF info from DA
-        prefix     = self.DVconfig.get('saveCDFprefix').ca
-        dirpath    = self.DVconfig.get('saveCDFDir').ca
+        prefix     = self.DVconfig.get('saveCDFprefix')
+        dirpath    = self.DVconfig.get('saveCDFDir')
         for cdfInfoT in cdfInfoLst :
             i = cdfInfoLst.index(cdfInfoT)
             label, cdf, counts, bin_edges = cdfInfoT

@@ -39,7 +39,7 @@ class Configer(object):
         """
         self.__config = dict()
         for key in default.keys() :
-            ca = _ConfAtom(default[key])
+            ca = _ConfAtom(default[key]).ca
             logging.debug('key:'+str(key))
             logging.debug('ca:'+str(ca))
             self.__config[key] = ca
