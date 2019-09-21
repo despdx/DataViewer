@@ -30,7 +30,7 @@ Requirements
 - warnings
 - Number
 
-### Copyright 2018 Paul R. DeStefano
+### Copyright 2019 Paul R. DeStefano
 >   This program is free software: you can redistribute it and/or modify
 >   it under the terms of the GNU General Public License as published by
 >   the Free Software Foundation, either version 3 of the License, or
