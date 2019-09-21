@@ -4,6 +4,7 @@ Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
 #TODO show filename somewhere
+#TODO Bug: Configer usage is wrong OR rewrite it
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
 #TODO user defined plot scale/axes
@@ -99,6 +100,22 @@ configDefault = {
                 ,'prefix'   : 'chop'
                 }
             ,'func'      : lambda c: isinstance(c,dict)
+            }
+        ,'savePlotDir'  : {
+            'default'   : pathlib.PurePath(os.path.curdir)
+            ,'func'      : lambda c: isinstance(c,pathlib.PurePath)
+            }
+        ,'savePlotPrefix'   : {
+            'default'   : 'plotView'
+            ,'func'     : lambda c: isinstance(c,str)
+            }
+        ,'saveCDFDir'   : {
+            'default'   : pathlib.PurePath(os.path.curdir)
+            ,'func'     : lambda c: isinstance(c,pathlib.PurePath)
+            }
+        ,'saveCDFprefix'    : {
+            'default'   : 'plotCDF'
+            ,'func'     : lambda c: isinstance(c,str)
             }
         }
 
@@ -713,26 +730,42 @@ class PageThree(tk.Frame):
             print(stats)
 
     def doChop(self) :
+        self.saveViewPlot()
         directory=pathlib.PurePath(os.path.curdir)
         chopConf = self.DVconfig.get('chopOpts')
         debug('chopConf:'+str(chopConf))
         debug('dict(chopConf):'+str(dict(chopConf)))
         self.DA.chop(dirpath=directory, **dict(chopConf))
 
+    def getViewID(self,label) :
+        start,end = self.DA.getStartEnd()
+        return "{label},{start}-{end}".format(label,start,end)
+
+    def saveViewPlot(self) :
+        fig = self.fig                                              # Get figure
+        start,end = self.DA.getStartEnd()                           # Get view range
+        dirpath = self.DVconfig.get('savePlotDir').ca               # Get settings
+        prefix = self.DVconfig.get('savePlotPrefix').ca
+        filename = prefix + "_{start}-{end}".format(start=start,end=end) + ".pdf"
+        pathname = os.path.join( dirpath , filename )
+        plt.savefig(pathname)                                       # Save plot
+
     def doStat(self) :
         """ Do actions for "stats" button
         """
         # First, show stats on STDOUT
         self.showStats()
+        # Then, save the current view plot
+        self.saveViewPlot()
         # Next, make a CDF plot for all the visible data
         cdfInfoLst = self.DA.getCDFall()                        # get CDF info from DA
-        #for (i,cdfInfoT) in zip(range(len(cdfInfoLst)),cdfInfoLst) :
+        prefix     = self.DVconfig.get('saveCDFprefix').ca
+        dirpath    = self.DVconfig.get('saveCDFDir').ca
         for cdfInfoT in cdfInfoLst :
             i = cdfInfoLst.index(cdfInfoT)
             label, cdf, counts, bin_edges = cdfInfoT
-            start,size = self.DA.getWindow()
-            end = start+size
-            filename = "plotCDF_{},{}-{},{}.pdf".format(label,start,end,i)
+            start,end = self.DA.getStartEnd()
+            filename = prefix +"_{},{}-{},{}.pdf".format(label,start,end,i)
             fig = plt.figure()                                  # mk new fig
             plt.plot(bin_edges[1:], cdf/cdf[-1])
             plt.xlabel("{} values".format(label))

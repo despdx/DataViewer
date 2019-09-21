@@ -445,6 +445,10 @@ class DataAnalyser(object):
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: getView: no data loaded")
         return ( self.windowStart , self.windowSize )
+
+    def getStartEnd(self) :
+        start,end = self.getWindow()
+        return (start, start+end)
     
     def getViewData(self) :
         """ Returns df of data in the current view

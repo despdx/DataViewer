@@ -140,3 +140,6 @@ class _ConfAtom(object):
 
     def __eq__(self,other):
         return self.__ca.__eq__(other)
+
+    def get(self):
+        return ca
