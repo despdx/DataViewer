@@ -3,7 +3,7 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO save stats to file, in addition to printing
+#TODO less complicated filenames for plot view files
 #TODO show filename somewhere
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
@@ -35,7 +35,6 @@ them out for easier analysis.
 #TODO show summary statistics for view in GUI
 #TODO enabling disabled view should assume primary view
 #TODO mark percentile/quantile on CDF plot
-#TODO make doStat/getStats print only one set
 #TODO rewrite Configer
 
 import matplotlib as mpl
@@ -121,6 +120,14 @@ configDefault = {
         ,'statQuantiles'    : {
             'default'   : (.5-.1827, .5+.1827, .5-.4545,.5+.4545, .5-.4973, .5+.4973)
             ,'func'     : lambda t: isinstance(t,tuple)
+            }
+        ,'statFilePrefix'    : {
+            'default'   : 'statsSave'
+            ,'func'     : lambda s: isinstance(s,str)
+            }
+        ,'statFileFmt'    : {
+            'default'   : '.csv'
+            ,'func'     : lambda s: isinstance(s,str)
             }
         }
 
@@ -731,6 +738,15 @@ class PageThree(tk.Frame):
         """ Get and report statsistics for the current view """
         quantiles = self.DVconfig.get('statQuantiles')
         statsList = self.DA.getStats( quantiles )
+        dirpath = self.DVconfig.get('saveCDFDir')
+        prefix = self.DVconfig.get('statFilePrefix')
+        for statDF  in statsList :
+            fmt = self.DVconfig.get('statFileFmt')
+            cols = ','.join(map(str,statDF.columns))
+            start,end = self.DA.getStartEnd()
+            filename = prefix + "_{},{}-{}".format(cols,start,end) + fmt
+            pathname = os.path.join( dirpath , filename )
+            statDF.to_csv(pathname)
         for stats in statsList:
             print("Data View Statistics:")
             print(stats)
@@ -771,11 +787,12 @@ class PageThree(tk.Frame):
             label, cdf, counts, bin_edges = cdfInfoT
             start,end = self.DA.getStartEnd()
             filename = prefix +"_{},{}-{},{}.pdf".format(label,start,end,i)
+            pathname = os.path.join( dirpath , filename )
             fig = plt.figure()                                  # mk new fig
             plt.plot(bin_edges[1:], cdf/cdf[-1])
             plt.xlabel("{} values".format(label))
             plt.ylabel("Normalized Cumulative Sum (CDF)".format())
-            fig.savefig(filename)
+            fig.savefig(pathname)
 
 class DataNotLoaded(Exception) :
     def __init__(self,*args,**kwargs) :
