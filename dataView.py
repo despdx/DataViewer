@@ -4,7 +4,6 @@ Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
 #TODO show filename somewhere
-#TODO Bug: Configer usage is wrong OR rewrite it
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
 #TODO user defined plot scale/axes
@@ -36,6 +35,7 @@ them out for easier analysis.
 #TODO enabling disabled view should assume primary view
 #TODO mark percentile/quantile on CDF plot
 #TODO make doStat/getStats print only one set
+#TODO rewrite Configer
 
 import matplotlib as mpl
 mpl.use("TkAgg")
