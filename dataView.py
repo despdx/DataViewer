@@ -4,7 +4,6 @@ Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
 #TODO More quantiles for +/- sigma
-#TODO Bug: view plots filenames missing labels
 #TODO show filename somewhere
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
@@ -739,16 +738,15 @@ class PageThree(tk.Frame):
         debug('dict(chopConf):'+str(dict(chopConf)))
         self.DA.chop(dirpath=directory, **dict(chopConf))
 
-    def getViewID(self,label) :
-        start,end = self.DA.getStartEnd()
-        return "{label},{start}-{end}".format(label,start,end)
-
     def saveViewPlot(self) :
         fig = self.fig                                              # Get figure
         start,end = self.DA.getStartEnd()                           # Get view range
         dirpath = self.DVconfig.get('savePlotDir')
         prefix = self.DVconfig.get('savePlotPrefix')
-        filename = prefix + "_{start}-{end}".format(start=start,end=end) + ".pdf"
+        viewList = self.DA.getView()
+        filename = prefix + "_{vl},{start}-{end}".format(
+                start=start,end=end, vl=viewList
+                ) + ".pdf"
         pathname = os.path.join( dirpath , filename )
         plt.savefig(pathname)                                       # Save plot
 
