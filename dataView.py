@@ -769,7 +769,7 @@ class PageThree(tk.Frame):
                 start=start,end=end, vl=viewStr
                 ) + ".pdf"
         pathname = os.path.join( dirpath , filename )
-        plt.savefig(pathname)                                       # Save plot
+        fig.savefig(pathname)                                       # Save plot
 
     def doStat(self) :
         """ Do actions for "stats" button
