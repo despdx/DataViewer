@@ -14,7 +14,7 @@ Features
   specific series/columns.
 - Browse the data as single series/column vs index, or plot two series against
   each other.
-- Calculate summary statistics (STDOUT)
+- (New) Calculate summary statistics (STDOUT,CSV)
 - (New) Produce plot of Cumulative Distribution Function (CDF) (of vertical
   axis data series) along with other statistics.
 - (New) Chop and Stats buttons now make copies of the view plot,
