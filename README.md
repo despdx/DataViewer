@@ -17,6 +17,8 @@ Features
 - Calculate summary statistics (STDOUT)
 - (New) Produce plot of Cumulative Distribution Function (CDF) (of vertical
   axis data series) along with other statistics.
+- (New) Chop and Stats buttons now make copies of the view plot,
+  automatically.
 
 Requirements
 -----------
