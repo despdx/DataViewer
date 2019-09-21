@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO less complicated filenames for plot view files
 #TODO show filename somewhere
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
@@ -765,8 +764,9 @@ class PageThree(tk.Frame):
         dirpath = self.DVconfig.get('savePlotDir')
         prefix = self.DVconfig.get('savePlotPrefix')
         viewList = self.DA.getView()
+        viewStr = ','.join(map(lambda x: ','.join(map(str,x)) if isinstance(x,tuple) else str(x), viewList))
         filename = prefix + "_{vl},{start}-{end}".format(
-                start=start,end=end, vl=viewList
+                start=start,end=end, vl=viewStr
                 ) + ".pdf"
         pathname = os.path.join( dirpath , filename )
         plt.savefig(pathname)                                       # Save plot
