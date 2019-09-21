@@ -521,16 +521,15 @@ class DataAnalyser(object):
             error("ERROR: DataAnalyser: chop: failed writing to file:"+chopFilePath)
             print(e)
 
-    def getStats(self):
+    def getStats(self, quantiles) :
         """ Show stats
         """
         #TODO make this just one result for all labels in all views
         dfList = self.getViewData()
-        quantileTgtT = (.683,.955,.997)
         statList = list()
         for df in dfList :
             # Create a DF of statistics data by combining the describe nad quantile features of pandas DF
-            statDF = pd.concat( [df.describe(),df.quantile(quantileTgtT)] )
+            statDF = pd.concat( [df.describe(),df.quantile(quantiles)] )
             statList.append( statDF )
         # pull off the first stat DF in the list
         statDF = statList.pop(0)

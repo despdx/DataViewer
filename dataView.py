@@ -3,7 +3,6 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
-#TODO More quantiles for +/- sigma
 #TODO show filename somewhere
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
@@ -117,6 +116,10 @@ configDefault = {
         ,'saveCDFprefix'    : {
             'default'   : 'plotCDF'
             ,'func'     : lambda c: isinstance(c,str)
+            }
+        ,'statQuantiles'    : {
+            'default'   : (.5-.1827, .5+.1827, .5-.4545,.5+.4545, .5-.4973, .5+.4973)
+            ,'func'     : lambda t: isinstance(t,tuple)
             }
         }
 
@@ -725,7 +728,8 @@ class PageThree(tk.Frame):
 
     def showStats(self):
         """ Get and report statsistics for the current view """
-        statsList = self.DA.getStats()
+        quantiles = self.DVconfig.get('statQuantiles')
+        statsList = self.DA.getStats( quantiles )
         for stats in statsList:
             print("Data View Statistics:")
             print(stats)
