@@ -3,7 +3,6 @@
 Data Analyser Helper
 
 '''
-#TODO angle transform
 #TODO linear fit, view
 #TODO NavigationToolbar2TkAgg depricated
 #TODO scaling (unit conversion)
@@ -54,6 +53,7 @@ def fixedTranslation(dfList, **kwargs) :
     newDFlist = list()
     xshift = kwargs['xTrans']                   # x translation value
     yshift = kwargs['yTrans']                   # y translation value
+    debug("translations: ({},{})".format(xshift,yshift))
     for df in dfList :
         newSeriesList = list()
         """Make a list of column,translation pairs to apply later.  Assumes
