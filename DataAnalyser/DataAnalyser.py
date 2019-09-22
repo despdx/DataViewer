@@ -350,6 +350,8 @@ class DataAnalyser(object):
         """
         if not self.isLoaded :
             raise _DataNotLoaded("ERROR: DataAnalyser: no data loaded")
+        if windowStart + windowSize > self.df.index.size :
+            raise Exception("ERROR: window out of range")
         debug("Got new view list:"+str(viewList))
         goodLabels = self.getLabels()
         if viewList is not None :
@@ -447,8 +449,10 @@ class DataAnalyser(object):
         return ( self.windowStart , self.windowSize )
 
     def getStartEnd(self) :
-        start,end = self.getWindow()
-        return (start, start+end)
+        start,size = self.getWindow()
+        end = start+size
+        debug("start,end:%s,%s" % (str(start),str(end)))
+        return (start, end)
     
     def getViewData(self) :
         """ Returns df of data in the current view
@@ -539,28 +543,35 @@ class DataAnalyser(object):
             statDF = newdf.T
         return [statDF]                                 #TODO need to return list for caller, could be changed
 
-    def getCDFforLabel(self, label) :
-        """ Return CDF information
-        """
-        num_bins = 100
-        winStart, winSize = self.getWindow()
-        winSlice = slice(winStart, winStart + winSize)
-        ser = self.df[label]
-        counts, bin_edges = np.histogram(ser[winSlice], bins=num_bins)
-        cdf = np.cumsum(counts)
-        return (label, cdf, counts, bin_edges)
-
-    def getCDFall(self) :
+    def getCDFall(self, num_bins=100) :
         """ Return data for CDF
         """
-        debug("getCDF: starting...")
+        debug("DA: getCDF: starting...")
+        debug("DA: getCDF: bins = %d" % num_bins)
+        viewDFlist = self.getViewData()
+        viewList = self.getView()
+        debug("DA: viewDFlist type:" + str(type(viewDFlist)))
+        debug("DA: viewList type:" + str(type(viewList)))
         cdfInfoLst = list()
-        for viewpair in self.currentView :
+        for viewpair in viewList :
             # for each "current view" of column/label pairs, do CDF of the ordinate
-            yLabel = viewpair[1] # ordinate
+            yLabel = viewpair[1]                                # ordinate
             debug("getCDF: got ordinate label: {}".format(yLabel))
-            cdfInfoT = self.getCDFforLabel( yLabel )
-            debug("getCDF: got CDF data: {}".format(type(cdfInfoT)))
+            ser = set()
+            for df in viewDFlist :
+                if yLabel in df.columns :
+                    ser = df[yLabel]                            # get Series data
+                    break
+                else :
+                    continue
+            #debug("DA: Series: " + str(ser))
+            counts, bin_edges = np.histogram(ser, bins=num_bins)
+            #debug("DA: counts: " + str(counts))
+            cdf = np.cumsum(counts)
+            debug("DA: cdf: " + str(cdf))
+            #assert not (cdf[-1] == 0)
+            cdfInfoT = (yLabel, cdf, counts, bin_edges)
+            debug("DA: getCDF: got CDF data: format: {}".format(type(cdfInfoT)))
             cdfInfoLst.append(cdfInfoT)
         return cdfInfoLst
 

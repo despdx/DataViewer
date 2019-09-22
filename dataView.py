@@ -3,6 +3,7 @@
 Just helps looking at large data groups and finding useful bits, and separating
 them out for easier analysis.
 """
+#TODO Bug, CDF plots raw data, need to pull after transforms
 #TODO show filename somewhere
 #TODO find a way to write only one index
 #TODO chop exports current view in addition to full dataset
@@ -47,8 +48,9 @@ style.use('ggplot')
 import os
 import pathlib
 from logging import *
-#basicConfig(level=DEBUG)
-basicConfig(level=ERROR)
+loglevel = ERROR
+#loglevel = DEBUG
+basicConfig(level=loglevel)
 from warnings import warn as warnwarn
 from numbers import Number
 import numpy as np
@@ -115,6 +117,10 @@ configDefault = {
         ,'saveCDFprefix'    : {
             'default'   : 'plotCDF'
             ,'func'     : lambda c: isinstance(c,str)
+            }
+        ,'saveCDFbins'    : {
+            'default'   : 100
+            ,'func'     : lambda i: isinstance(i,int)
             }
         ,'statQuantiles'    : {
             'default'   : (.5-.1827, .5+.1827, .5-.4545,.5+.4545, .5-.4973, .5+.4973)
@@ -779,7 +785,8 @@ class PageThree(tk.Frame):
         # Then, save the current view plot
         self.saveViewPlot()
         # Next, make a CDF plot for all the visible data
-        cdfInfoLst = self.DA.getCDFall()                        # get CDF info from DA
+        num_bins = self.DVconfig.get('saveCDFbins')
+        cdfInfoLst = self.DA.getCDFall(num_bins=num_bins)                        # get CDF info from DA
         prefix     = self.DVconfig.get('saveCDFprefix')
         dirpath    = self.DVconfig.get('saveCDFDir')
         for cdfInfoT in cdfInfoLst :
